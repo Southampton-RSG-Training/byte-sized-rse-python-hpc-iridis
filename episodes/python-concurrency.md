@@ -254,20 +254,18 @@ with ThreadPoolExecutor(max_workers=n_workers) as executor:
 
 In the threaded case, things are promising when we use a worker pool with 2 workers, but as we increase the size of the pool (up to a maximum of the number of cores in the CPU) the efficiency drops away fairly quickly and there is basically no improvement from going from 4 workers up to 10. Some of this is hardware-related—the particular computer these numbers were generated on has 4 performance cores—but it is also related to the Python GIL becoming the bottleneck.
 
-=========== ====== ==========
-n_workers   time   efficiency
-=========== ====== ==========
-1           130.00       1.00
-2            68.94       0.94
-3            52.71       0.82
-4            43.46       0.75
-5            42.10       0.62
-6            41.57       0.52
-7            38.89       0.48
-8            39.22       0.41
-9            38.77       0.37
-10           40.30       0.32
-=========== ====== ==========
+| n_workers |  time  | efficiency |
+| :-------- | ------:| ---------: |
+|  1        | 130.00 |      1.00  |
+|  2        |  68.94 |      0.94  |
+|  3        |  52.71 |      0.82  |
+|  4        |  43.46 |      0.75  |
+|  5        |  42.10 |      0.62  |
+|  6        |  41.57 |      0.52  |
+|  7        |  38.89 |      0.48  |
+|  8        |  39.22 |      0.41  |
+|  9        |  38.77 |      0.37  |
+| 10        |  40.30 |      0.32  |
 
 ::: challenge
 
@@ -304,19 +302,18 @@ with ProcessPoolExecutor(max_workers=n_workers) as executor:
         pass
 ```
 
-=========== ====== ==========
-n_workers   time   efficiency
-=========== ====== ==========
-2            68.90       0.94
-3            48.75       0.89
-4            40.88       0.80
-5            37.37       0.70
-6            35.73       0.61
-7            33.87       0.55
-8            32.95       0.49
-9            32.46       0.44
-10           32.58       0.40
-=========== ====== ==========
+| n_workers | time  | efficiency |
+| :-------- | ----: | ---------: |
+|  2        | 68.90 |      0.94  |
+|  3        | 48.75 |      0.89  |
+|  4        | 40.88 |      0.80  |
+|  5        | 37.37 |      0.70  |
+|  6        | 35.73 |      0.61  |
+|  7        | 33.87 |      0.55  |
+|  8        | 32.95 |      0.49  |
+|  9        | 32.46 |      0.44  |
+| 10        | 32.58 |      0.40  |
+
 
 While we some decay in efficiency from additional workers, and further, we are still seeing improvements as we increase the number of workers up to the point where we have more workers than cores (including the main executor): running with 12 workers was slightly slower than running with 8, for example).
 
