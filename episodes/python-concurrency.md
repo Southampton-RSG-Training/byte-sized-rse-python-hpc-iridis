@@ -4,7 +4,7 @@ teaching: 0 # teaching time in minutes
 exercises: 0 # exercise time in minutes
 ---
 
-:::::::::::::::::::::::::::::::::::::: questions
+::: questions
 
 - What are the options available for concurrently running tasks using the Python programming language?
 - What are the strengths and weaknesses of each approach?
@@ -12,9 +12,9 @@ exercises: 0 # exercise time in minutes
 - How can I effectively use Python in an HPC context?
 - How can I use MPI to distribute Python tasks across multiple nodes in an HPC system?
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
-::::::::::::::::::::::::::::::::::::: objectives
+::: objectives
 
 - Discuss the different approaches to concurrency in Python: asyncio, threading, and multi-process.
 - Understand the Global Interpreter Lock (GIL) and its implications for threaded code in Python.
@@ -22,7 +22,7 @@ exercises: 0 # exercise time in minutes
 - Run concurrent Python code locally and on a single HPC node using SLURM.
 - Run concurrent Python code on multiple HPC nodes using SLURM, MPI and `mpi4py.futures`.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
 It's likely that you'll be writing a lot of your code in Python. Python has a number of different ways of accessing concurrency with various advantages and disadvantages, not all of which are appropriate for HPC tasks, so it's important to have an understanding of each.
 
@@ -412,6 +412,8 @@ That puts us in a position to run the code using Iridis. In fact, for a small jo
 
 However, we want to learn how to use the full power of Iridis.
 
+:::
+
 ### Running on one node with multiple cores
 
 We don't need a lot of memory for our script, so the standard Iridis 6 nodes are a good fit. Each of these have 192 total cores, so if we run on one node we could potentially have 192 simultaneous workers.  In this case we can use our run_multiprocessing script unmodified, but call it from a batch script which looks like:
@@ -508,8 +510,6 @@ This is significantly faster than the local speed: the time taken for the inner 
 
 ### Running on multiple nodes
 
-
-
 There are a couple of ways that we can extend the work to multiple nodes.  MPI4Py supports an `MPIPoolExecutor` which is almost a drop-in replacement for the `ProcessPoolExecutor` (there is an `MPICommExecutor` which supports older MPI APIs but isn't a drop-in replacement).
 
 The main difference between the MPI version of the script and other versions is that we have removed TQDM and other output relevant for the console, since the script will be run in batch mode.
@@ -573,6 +573,7 @@ The first thing we need is to make sure that we have mpi4py and any other depend
 ``` console
 [login6003 augment_images] (venv)$ pip install --requirements-from-script augment_images_mpi.py
 ```
+:::
 
 The key points about the latter:
 
