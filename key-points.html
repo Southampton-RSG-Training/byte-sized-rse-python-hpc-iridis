@@ -260,7 +260,7 @@
 <div class="accordion accordion-flush" id="accordionFlush4">
   <div class="accordion-item">
     <div class="accordion-header" id="flush-heading4">
-        <a href="python-concurrency.html">3. Concurrency in Python</a>
+        <a href="python-concurrency.html">3. HPC with Python</a>
     </div>
 <!--/div.accordion-header-->
 
@@ -349,30 +349,30 @@ directives (resource requests) and the commands to be run.</li>
 monitor its status, and <code>scancel</code> to cancel it.</li>
 <li>Use <code>sinteractive</code> to request a live terminal session on
 a compute node for debugging or interactive work.</li>
-</ul></section><section id="python-concurrency"><h2 class="section-heading"><a href="python-concurrency.html">Concurrency in Python</a></h2>
+</ul></section><section id="python-concurrency"><h2 class="section-heading"><a href="python-concurrency.html">HPC with Python</a></h2>
 <hr class="half-width">
 <ul>
 <li>There are different approaches to concurrency in Python:
 <ul>
-<li>for I/O bound systems, such as servers and networking code, asyncio
-is a good choice</li>
 <li>the use of threading is a good choice when there is a lot of C
 extension code that releases the GIL</li>
 <li>multiprocessing is good for both CPU and I/O bound code, but is more
 resource intensive</li>
+<li>for I/O bound systems, such as servers and networking code, asyncio
+is a good choice</li>
 </ul>
 </li>
 <li>Python’s Global Interpreter Lock generally means that only one
 Python instruction can be executed at a time, but carefully written C
 extensions can release the GIL to permit concurrency.</li>
-<li>Enhancements to the Python language</li>
 <li>The <code>concurrent.futures</code> module in the standard library
 provides an interface for concurrency which is suiltable for common
 “scatter-gather” and “map-reduce” workflows and is consistent across
 different approaches to concurrency.</li>
 <li>The <code>mpi4py.futures</code> module, which is part of MPI4Py
-gives an easy method of taking concurrent code which works locally and
-distributing it across multiple nodes of an HPC system.</li>
+gives an easy method of taking <code>concurrent.futures</code> code
+which works locally and distributing it across multiple nodes of an HPC
+system.</li>
 </ul></section>
 </div>
     </main>
