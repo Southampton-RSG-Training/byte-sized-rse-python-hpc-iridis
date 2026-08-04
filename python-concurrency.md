@@ -1,5 +1,5 @@
 ---
-title: "Concurrency in Python"
+title: "HPC with Python"
 teaching: 0 # teaching time in minutes
 exercises: 0 # exercise time in minutes
 ---
@@ -24,21 +24,13 @@ exercises: 0 # exercise time in minutes
 
 :::
 
+## Concurrency in Python
+
 It's likely that you'll be writing a lot of your code in Python. Python has a number of different ways of accessing concurrency with various advantages and disadvantages, not all of which are appropriate for HPC tasks, so it's important to have an understanding of each.
-
-### Async Python
-
-Python provides language support for coorperative concurrency via the `async` and `await` keywords and the `asyncio` standard library.  These provide a concurrency model where each task is passed control, does what it needs to do, and relinquishes control when it is done. Each time a task is given control, it resumes execution where it left off.  However only one task is ever running at one time.
-
-To stretch our painting analogy, this approach is like having multiple painters but only one brush. When a painter gets tired they can pause painting their wall and rest while another painter paints different wall.  However the paintbrush is only exchanged when the current painter is done with it.
-
-This simplifies the programming of these systems, because the fact that there is only one thing running at a time reduces the likelihood of race conditions and the need to acquire locks to gain control of a resource.  This is great for tasks which spend most of their time waiting for other things to do work, particularly I/O. Async is used heaviliy in Python networking software for this reason: most of the time each task is waiting for a remote client to respond.  Asyncio is very light-weight compared to threads so it is possible to have many more tasks active at a given time using asyncio compared to threading approaches.
-
-However async-based tasks are a poor choice for HPC, because most tasks are going to be working almost all the time: they are rarely waiting for other things to happen.  Using Python's async/await system for HPC effectively limits you to one core, and will likely be slower than if you simply performed the computation sequentially.
 
 ### Threading and the Global Interpreter Lock (GIL)
 
-A fundamental feature of Python for the last 30 years, ever since threading support was added, has been the so-called "Global Interpereter Lock" or "GIL".  This is a lock which the Python interpreter acquires before it executes a Python bytecode, and releases after the bytecode is finished executing.  This global lock simplifies the Python interpreter's code and experimentally has been shown to generally be faster than the alternative of a system of fine-grained locks on individual pieces of data for single-threaded code.
+A fundamental feature of Python for the last 30 years, ever since threading support was added, has been the so-called "Global Interpreter Lock" or "GIL".  This is a lock which the Python interpreter acquires before it executes a Python virtual machine instruction, and releases after the bytecode is finished executing.  This global lock simplifies the Python interpreter's code and experimentally has been shown to generally be faster than the alternative of a system of fine-grained locks on individual pieces of data for single-threaded code.
 
 In our painting example this is equivalent to there being many painters but only one paintbrush. However compared to the async situation there is a manager who periodically takes the paintbrush away from one painter and gives it to another so everyone gets a turn.
 
@@ -60,7 +52,17 @@ One way to overcome the GIL is to have multiple Python interpreters running, eac
 
 However processes are very heavy-weight compared to threads, in particular there is a lot of overhead in starting a new process with a new Python interpreter. Additionally, unlike threads which can share state freely, in multiprocessing you need to carefully allocate which objects are shared between the processes, and they can only be certain fundamental data types (which fortunately includes views of arrays and tensors). If you don't you can end up with multiple copies of the same object, one in each process, which can be a problem when you are dealing with multi-gigabyte arrays or sets of NN weights.
 
-::: callout
+### Async Python
+
+Python provides language support for coorperative concurrency via the `async` and `await` keywords and the `asyncio` standard library.  These provide a concurrency model where each task is passed control, does what it needs to do, and relinquishes control when it is done. Each time a task is given control, it resumes execution where it left off.  However only one task is ever running at one time.
+
+To stretch our painting analogy, this approach is like having multiple painters but only one brush. When a painter gets tired they can pause painting their wall and rest while another painter paints different wall.  However the paintbrush is only exchanged when the current painter is done with it.
+
+This simplifies the programming of these systems, because the fact that there is only one thing running at a time reduces the likelihood of race conditions and the need to acquire locks to gain control of a resource.  This is great for tasks which spend most of their time waiting for other things to do work, particularly I/O. Async is used heavily in Python networking software for this reason: most of the time each task is waiting for a remote client to respond.  Asyncio is very light-weight compared to threads so it is possible to have many more tasks active at a given time using asyncio compared to threading approaches.
+
+However async-based tasks are a poor choice for HPC, because most tasks are going to be working almost all the time: they are rarely waiting for other things to happen.  Using Python's async/await system for HPC effectively limits you to one core, and will likely be slower than if you simply performed the computation sequentially.
+
+::: spoiler
 
 ### The Future
 
@@ -74,27 +76,41 @@ Two new features in recent and upcoming versions of Python promise some improvem
 
 ## Practical Advice
 
-On its own the standard version of Python (which written in C and so is sometimes called CPython) is a poor language for HPC: it is slow and doesn't support parallelism very well. What makes Python such a popular language for HPC is that it is easy to extend with C, C++ or Fortran code allowing you to do your computation in those fast languages, in parallel if needed, and that there is an extensive, high-quality collection of extension libraries like Pillow, NumPy, SciPy, Scikit Learn, PyTorch and many, many others that interoperate really well (eg. if you are careful you can turn a Pillow image into a NumPy ndarray and then into a PyTorch CPU-based tensor without any copying of memory, and so can be extremely fast even when dealing with very large amounts of data).
+On its own the standard version of Python (which written in C and so is sometimes called CPython) is a poor language for HPC: it is slow and doesn't support parallelism very well.
 
-In particular, if you are writing complex computations in pure Python without vectorizing computations using NumPy, PyTorch or similar libraries then you can potentially get significant speedups by either vectorizing, or if that doesn't match your algorithm, speeding up your hotspots using tools like Cython or Numba which allow you to convert correct and working Python code to faster compiled code without significant changes.  Most of these tools have easy ways to release the GIL to allow parallelism in
+What makes Python such a popular language for HPC is that it is easy to extend with C, C++ or Fortran code allowing you to do your computation in those fast languages, in parallel if needed by releasing the GIL.
 
-::: callout
+But more importantly there is an extensive, high-quality collection of extension libraries like Pillow (which wraps various C image format libraries), NumPy (which wraps linear algebra libraries like BLAS), SciPy (which wraps many C and Fortran computational libraries), and PyTorch (which wraps GPU code) that interoperate really well.
 
-### OpenMP
+This means Python is an excellent "glue" language: effectively sticking together unrelated libraries from different domains which would be complex to do in C or Fortran.  For example, you can turn a Pillow `Image` into a NumPy `ndarray` and then into a PyTorch `Tensor` very efficiently. This means that carefully-written code can be extremely fast even when dealing with very large amounts of data.
 
-Another common way of parallelising HPC code is the OpenMP library. This doesn't make sense for pure Python code, but C extensions can make use of it and tools like Numba and Cython offer built-in support for it, which can potentially avoid the need for threading in Python.  Additionally NumPy is starting to introduce OpenMP support as a compile-time option for some operations (you will need to build NumPy from source to use this).
+If you find yourself writing complex numerical computations in pure Python, you should be looking to vectorize the computations using libraries like NumPy, Pandas, and PyTorch; or if the computations are not easily vectorised, use tools like Cython or Numba to convert working Python code to faster compiled code.
 
-:::
+You should always pursue these sorts of optimizations before trying to run code on an HPC cluster.
+
+### Threading and Multiprocessing
+
+When your work is highly numerical code that releases the GIL (such as the linear algebra code in NumPy), threading is often effective at speeding things up. This is particularly the case when you are dealing with very large arrays in memory, as threaded code shares the data. Multiprocessing code does not, so you may end up with a copy of the data in each process which can cause problems.
+
+The Python `threading` and `multiprocessing` libraries have a very similar interface, so it not hard to convert from one to the other. In particular, the `concurrent.futures` library we will discuss later provides a nice higher-level interface that makes it very easy to switch approaches.
 
 ### MPI
 
-When work needs to be spread over multiple nodes, Python has the third-party MPI4Py as a wrapper around the MPI protocol.  MPI4Py allows passing messages which contain any Python object which can be serialized using the standard library "pickle" protocol and is quite flexible as a result.  It has more efficient modes which use NumPy's array data structures to perform lower-level sharing of data
+When work needs to be spread over multiple HPC nodes, Python has the MPI4Py library as a wrapper around the MPI protocol.  MPI4Py allows passing messages which contain any Python object which can be serialized using the standard library "pickle" protocol and is quite flexible as a result.  It has more efficient modes which use NumPy's array data structures to perform lower-level sharing of data
 
 ### PyTorch and Accelerate
 
 When it comes to working with PyTorch for concurrent GPU work, `torch.distributed` is available with various backends depending on the hardware that you have.  However `torch.distributed` is moderately low-level: care needs tobe taken to indicate places where parallelised operations have to synchronise before proceeding on to the next step.
 
 The `accelerate` library is a wrapper around `torch.distributed` which allows you to more easily adapt GPU code that works synchronously to be distributed across multiple threads, processes, or nodes as needed.
+
+::: spoiler
+
+### OpenMP
+
+Another common way of parallelising HPC code is the OpenMP library. This doesn't make sense for pure Python code, but C extensions can make use of it and tools like Numba and Cython offer built-in support for it, which can potentially avoid the need for threading in Python.  Additionally NumPy is starting to introduce OpenMP support as a compile-time option for some operations (you will need to build NumPy from source to use this).
+
+:::
 
 ## Example: Data augmentation
 
@@ -144,36 +160,7 @@ def main(input_dir):
 
 This is a somewhat interesting problem since it's trivially parallelisable - every image can be dealt with independently of every other image, so if we had a big enough machine we could potentially process all the images simultaneously - but there is both a lot of computation and a lot of reading and writing to/from the filesystem.
 
-::: challenge
-
-### Local Install and Dataset Download
-
-We need to create a Python environment with our dependencies.
-
-``` console
-$ python3.14 -m venv venv
-$ source venv/bin/activate
-(venv)$ cd data_augmentation
-(venv)$ pip install -U pip
-(venv)$ pip install --requirements-from-script image_augmentation.py
-```
-
-We also need a local copy of the Oxford Flower Dataset. There is a script that will perform the installation:
-
-``` console
-(venv)$ python download_images.py
-```
-
-This should create a `flowers-102/jpg` directory containing the images we will be working with. There are about 8000 images of flowers.
-
-We can now run the script on the flower dataset:
-
-``` console
-(venv)$ python augment_images.py flowers-102/jpg
-```
-:::
-
-::: callout
+::: spoiler
 
 #### `click` and `tqdm`
 
@@ -182,6 +169,40 @@ This script uses a couple of third-party libraries that make the script more erg
 The `click` library makes command-line argument processing much easier and more straightforward. In this case we provide a single command-line argument `input_dir` which is the input directory path and which gets passed into the `main` function. The `click` library handles all the parsing and validation of arguments (the path must be a directory which exists, and we get a `Path` object rather than a string).
 
 The `tqdm` is a library that displays simple progress bars in command-line programs. While it has a lot of options and different ways to use it, the simplest way is to wrap the iterable of a `for` loop in a call to `tqdm` and it will handle everything else.
+
+:::
+
+::: prereq
+
+### Local Install and Dataset Download
+
+We need to create a Python environment with our dependencies.
+
+``` bash
+$ python3.14 -m venv venv
+$ source venv/bin/activate
+(venv)$ cd data_augmentation
+(venv)$ pip install -U pip
+(venv)$ pip install --requirements-from-script image_augmentation.py
+```
+
+We also need a local copy of the Oxford Flower Dataset. There is a script that will perform the installation:
+``` bash
+(venv)$ python download_images.py
+```
+
+This should create a `flowers-102/jpg` directory containing the images we will be working with. There are about 8000 images of flowers.
+
+:::
+
+::: discussion
+
+We can now run the script on the flower dataset:
+``` bash
+(venv)$ python augment_images.py flowers-102/jpg
+```
+
+How long does it take to run on your machine?
 
 :::
 
@@ -213,9 +234,9 @@ Time taken: 640.44s
 
 Inspection of the results tells us that about 1/2 of the time is being spent manipulating and encoding the images, and the remaining 1/2 of the time is spent on storage I/O.  Slower machines will likely show a split with more time spent on
 
-::: callout
+::: spoiler
 
-### Profilers
+### Profiling Python Code
 
 Python has two profilers as part of the standard Python library: `profile` and `cProfile`. These have the same interface and behave the same way, but `cProfile` is written as a C extension model and so is faster with less overhead. You should always use `cProfile` when available.
 
@@ -229,7 +250,7 @@ In Python 3.15, the standard library is getting a new sampling profiler `profili
 
 :::
 
-### Parallel Code with `concurrent.futures`
+## Parallel Code with `concurrent.futures`
 
 When you have simple parallelism where each call is independent, Python provides the `concurrent.futures` module.  This module is designed to make it easy to write "scatter-gather" and "map-reduce" style parallel code
 
@@ -254,20 +275,18 @@ with ThreadPoolExecutor(max_workers=n_workers) as executor:
 
 In the threaded case, things are promising when we use a worker pool with 2 workers, but as we increase the size of the pool (up to a maximum of the number of cores in the CPU) the efficiency drops away fairly quickly and there is basically no improvement from going from 4 workers up to 10. Some of this is hardware-related—the particular computer these numbers were generated on has 4 performance cores—but it is also related to the Python GIL becoming the bottleneck.
 
-=========== ====== ==========
-n_workers   time   efficiency
-=========== ====== ==========
-1           130.00       1.00
-2            68.94       0.94
-3            52.71       0.82
-4            43.46       0.75
-5            42.10       0.62
-6            41.57       0.52
-7            38.89       0.48
-8            39.22       0.41
-9            38.77       0.37
-10           40.30       0.32
-=========== ====== ==========
+| n_workers |  time  | efficiency |
+| :-------- | ------:| ---------: |
+|  1        | 130.00 |      1.00  |
+|  2        |  68.94 |      0.94  |
+|  3        |  52.71 |      0.82  |
+|  4        |  43.46 |      0.75  |
+|  5        |  42.10 |      0.62  |
+|  6        |  41.57 |      0.52  |
+|  7        |  38.89 |      0.48  |
+|  8        |  39.22 |      0.41  |
+|  9        |  38.77 |      0.37  |
+| 10        |  40.30 |      0.32  |
 
 ::: challenge
 
@@ -275,13 +294,13 @@ n_workers   time   efficiency
 
 To do a fair comparison, we need to remove the output, since overwriting this many files is significantly slower than writing new files. This may take a few seconds:
 
-``` console
+``` bash
 (venv)$ rm -rf output/
 ```
 
 Run the threaded version of the script on your machine:
 
-``` console
+``` bash
 (venv)$ python augment_images_threading.py flowers-102/jpg
 ```
 
@@ -304,19 +323,18 @@ with ProcessPoolExecutor(max_workers=n_workers) as executor:
         pass
 ```
 
-=========== ====== ==========
-n_workers   time   efficiency
-=========== ====== ==========
-2            68.90       0.94
-3            48.75       0.89
-4            40.88       0.80
-5            37.37       0.70
-6            35.73       0.61
-7            33.87       0.55
-8            32.95       0.49
-9            32.46       0.44
-10           32.58       0.40
-=========== ====== ==========
+| n_workers | time  | efficiency |
+| :-------- | ----: | ---------: |
+|  2        | 68.90 |      0.94  |
+|  3        | 48.75 |      0.89  |
+|  4        | 40.88 |      0.80  |
+|  5        | 37.37 |      0.70  |
+|  6        | 35.73 |      0.61  |
+|  7        | 33.87 |      0.55  |
+|  8        | 32.95 |      0.49  |
+|  9        | 32.46 |      0.44  |
+| 10        | 32.58 |      0.40  |
+
 
 While we some decay in efficiency from additional workers, and further, we are still seeing improvements as we increase the number of workers up to the point where we have more workers than cores (including the main executor): running with 12 workers was slightly slower than running with 8, for example).
 
@@ -328,13 +346,13 @@ The result of this experiment is that running with even more cores on a larger m
 
 Remove the output directory once again:
 
-``` console
+``` bash
 (venv)$ rm -rf output/
 ```
 
 Now run the multiprocess version of the script on your machine:
 
-``` console
+``` bash
 (venv)$ python augment_images_threading.py flowers-102/jpg
 ```
 
@@ -362,38 +380,26 @@ However, if the speed-up were from 10 minutes to 5 or less, you've now reached a
 
 We've determined that this is a task that (a) distributes well with multiprocessing, and (b) doesn't involve GPU work, so Iridis 6 would be an appropriate cluster to run this on as a distributed workflow.  Because there is no communication need between tasks, it would gain both from running on a machine with more cores and for being distributed over more nodes.  However the second of these will require some re-thinking of the way the code distributes tasks.
 
-Iridis uses [SLURM](https://slurm.schedmd.com/overview.html) for its job control system. SLURM works by using Bash scripts annotated with comments which describe how the script should be run.  So to run a Python script, you need to write a shell script that:
-
-- loads the Python support module for SLURM and any other modules you might need
-- activates a Python virtual environment for your script to run
-- runs the script
-- cleans up after itself
-
-::: challenge
+::: prereq
 
 ### Installing on Iridis
 
 You will need to log-in to Iridis using your credentials, something like (replacing `<username>` with your username, and depending on how you set up your `ssh` keys, it may have an additional `-i` option):
-
-``` console
+``` bash
 $ ssh <username>@iridis6.soton.ac.uk
 ```
 
 Once you've logged in, you'll need to download the git repo with:
-
-``` console
+``` bash
 [login6003 ~]$ git clone https://github.com/Southampton-RSG-Training/byte-sized-rse-python-hpc-example.git
 ```
 
 Since we're using python, we need to activate the python module:
-
-``` console
+``` bash
 [login6003 ~]$ module load python
 ```
-
 and then change directory to the source directory, and repeat the set-up for the python environment:
-
-``` console
+``` bash
 [login6003 ~]$ cd augment_images
 [login6003 augment_images]$ python3.14 -m venv venv
 [login6003 augment_images]$ source venv/bin/activate
@@ -401,10 +407,8 @@ and then change directory to the source directory, and repeat the set-up for the
 [login6003 augment_images] (venv)$ pip install -U pip
 [login6003 augment_images] (venv)$ pip install --requirements-from-script augment_images.py
 ```
-
 and download the data set:
-
-``` console
+``` bash
 [login6003 augment_images] (venv)$ python download_images.py
 ```
 
@@ -414,7 +418,7 @@ However, we want to learn how to use the full power of Iridis.
 
 :::
 
-### Running on one node with multiple cores
+### Running with Multiple Cores
 
 We don't need a lot of memory for our script, so the standard Iridis 6 nodes are a good fit. Each of these have 192 total cores, so if we run on one node we could potentially have 192 simultaneous workers.  In this case we can use our run_multiprocessing script unmodified, but call it from a batch script which looks like:
 
@@ -444,23 +448,37 @@ cd $SLURM_SUBMIT_DIR
 # activate the Python environment
 source venv/bin/activate
 
-# run the code
-python python augment_images.py --n-workers $SLURM_CPUS_PER_TASK
+# run the code (disable progress bar when running batch)
+TQDM_DISABLE=1 python augment_images_multiprocessing.py
 
 # Clean-up
 deactivate
 module purge
 ```
 
+::: spoiler
+
+### Disabling TQDM
+
+By prepending `TQDM_DISABLE=1` to the Python command, we turn off the progress bar, which is not really appropriate for batch code.
+
+:::
+
 ::: challenge
 
-On the Iridis 6 login node run:
+### Run the Code
 
-``` console
+Schedule the job to run on Iridis 6.
+
+::: solution
+
+On the Iridis 6 login node run:
+``` bash
 [login6003 augment_images]$ sbatch run_multiprocess.slurm
 ```
+you can monitor job progress with `squeue -lu <username>` or looking at the `sbatch` file in your current directory.
 
-and then monitor job progress with `squeue -lu <username>` or looking at the `sbatch` file in your current directory; and when the job is done, look at the results in the slurm output file:
+When the job is done, the results in the SLURM output file should look like this:
 
 ```
 ===============================================================================
@@ -508,11 +526,26 @@ This is significantly faster than the local speed: the time taken for the inner 
 
 :::
 
-### Running on multiple nodes
+:::
+
+## Multiple nodes with MPI4Py
 
 There are a couple of ways that we can extend the work to multiple nodes.  MPI4Py supports an `MPIPoolExecutor` which is almost a drop-in replacement for the `ProcessPoolExecutor` (there is an `MPICommExecutor` which supports older MPI APIs but isn't a drop-in replacement).
 
-The main difference between the MPI version of the script and other versions is that we have removed TQDM and other output relevant for the console, since the script will be run in batch mode.
+The main difference between the MPI version of the script and other versions is that we have removed TQDM and other output relevant for the console, since the script will be run in batch mode. The core code looks almost the same as the `concurrent.futures` example.
+
+``` python
+from mpi4py.futures import MPIPoolExecutor
+
+paths = sorted(Path(input_dir).glob("*.jpg"))
+
+with MPIPoolExecutor() as executor:
+    for result in executor.map(augment_image, paths):
+        # if the function returns anything we could do something with
+        # the result; but augment_image doesn't return anything so we
+        # do nothing
+        pass
+```
 
 The batch file is similar to the previous one:
 
@@ -567,27 +600,44 @@ and the command to run the code:
 mpirun -mca coll_hcoll_enable 0 -n $SLURM_NTASKS python -m mpi4py.futures augment_images_mpi.py
 ```
 
-::: challenge
-The first thing we need is to make sure that we have mpi4py and any other dependencies installed in our Python environment:
-
-``` console
-[login6003 augment_images] (venv)$ pip install --requirements-from-script augment_images_mpi.py
-```
-:::
-
 The key points about the latter:
 
 - `mpirun` (or equivalently `mpiexec`) runs a program that uses MPI. It is configured with the total number of processes being run. There are many other command-line options which can be set, but this is the main one for us.
-- `-mca coll_hcoll_enable 0` turns off the `hcoll` collective communication which doesn't work with MPI on iridis 6.
-- `-n $SLURM_NTASKS` tells the code.
+- `-mca coll_hcoll_enable 0` turns off the `hcoll` collective communication which doesn't work with MPI on Iridis 6.
+- `-n $SLURM_NTASKS` tells MPI how many total tasks are being run.
 - instead of running Python code directly, we use the `mpi4py.futures` module which handles configuring the MPI infrastructure to run with the `mpi4py.futures` module, and then invokes our code.
 
-As it turns out, the overhead of distribution doesn't make up for the additional nodes in this case, and the work is starting to be I/O bound rather than CPU bound with the slower storage.  Additionally, any batch system has variable run times: most notably how long it takes for the job to start, but also how long  But the step from single node to multinode is very easy.
+::: challenge
 
-Overhead from MPI includes:
+### Run the Code
 
-- node preparation and communication
-- overhead for importing Python modules on each worker.
+The first thing we need is to make sure that we have mpi4py and any other dependencies installed in our Python environment:
+
+``` bash
+[login6003 augment_images] (venv)$ pip install --requirements-from-script augment_images_mpi.py
+```
+
+As in previous exercises, to do a fair comparison we need to remove the output since overwriting this many files is significantly slower than writing new files. This may take a few seconds:
+
+``` bash
+(venv)$ rm -rf output/
+```
+
+Now schedule the job to run on Iridis 6.
+
+::: solution
+
+On the Iridis 6 login node run:
+``` bash
+[login6003 augment_images]$ sbatch run_mpi.slurm
+```
+you can monitor job progress with `squeue -lu <username>` or looking at the `sbatch` file in your current directory.
+
+:::
+
+:::
+
+As it turns out, the overhead of distribution doesn't make up for the additional nodes in this case, and the work is starting to be I/O bound rather than CPU bound with the slower storage.  But the step from single node to multinode is very easy, and for more computationaly expensive code, you will see a speed-up.
 
 ::: callout
 
@@ -595,20 +645,24 @@ The `mpi4py.futures` module is a comparatively new addition to MPI4Py, and has a
 
 If you are writing code which has complex interactions between workers, you may need to learn how to program MPI at this level.
 
-For GPU code, particularly PyTorch, there are libraries which sit on top of MPI and similar systems that allow you
-
 :::
 
+::: instructor
+
+### The "Happy Path" of `concurrent.futures`
+
+Emphasise the ease with which the learners can go from working, local code to working single-node code, to working multi-node code with just a few simple changes to their code.
+
+:::
 
 ::: keypoints
 
 - There are different approaches to concurrency in Python:
-  - for I/O bound systems, such as servers and networking code, asyncio is a good choice
   - the use of threading is a good choice when there is a lot of C extension code that releases the GIL
   - multiprocessing is good for both CPU and I/O bound code, but is more resource intensive
+  - for I/O bound systems, such as servers and networking code, asyncio is a good choice
 - Python's Global Interpreter Lock generally means that only one Python instruction can be executed at a time, but carefully written C extensions can release the GIL to permit concurrency.
-- Enhancements to the Python language
 - The `concurrent.futures` module in the standard library provides an interface for concurrency which is suiltable for common "scatter-gather" and "map-reduce" workflows and is consistent across different approaches to concurrency.
-- The `mpi4py.futures` module, which is part of MPI4Py gives an easy method of taking concurrent code which works locally and distributing it across multiple nodes of an HPC system.
+- The `mpi4py.futures` module, which is part of MPI4Py gives an easy method of taking `concurrent.futures` code which works locally and distributing it across multiple nodes of an HPC system.
 
 :::
