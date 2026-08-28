@@ -68,7 +68,7 @@ Before we discuss High Performance Computing clusters in more detail let's start
 </table>
 
 
-### If Our PC isnt Powerful Enough?
+### If Our PC isn't Powerful Enough?
 
 ![Outsourcing Computational Tasks: many of the tasks we perform daily using computers are outsourced to remote servers ](fig/server.svg){width="20%"}
 
@@ -166,9 +166,9 @@ As students, you will typically have access to Tier 3 resources. Access to highe
 
 ## Local HPC Clusters
 
-### Iridis 6 & Iridis X
+### Iridis 6, Iridis X and Iridis 7
 
-The local tier 3 system at the University of Southampton is known as Iridis, which is comprised of two separate clusters known as **Iridis 6** & and **Iridis X**.
+The local tier 3 system at the University of Southampton is known as Iridis, which is comprised of the clusters known as **Iridis 6**, **Iridis X** and the new **Iridis 7**.
 
 Iridis 6 is the University's CPU based HPC cluster, intended for running large parallel, multi-node, CPU based workloads. It comprised of 26,000+ AMD CPUs:
 
@@ -215,6 +215,8 @@ There is also departmental cluster within Iridis X, known as Swarm. It is for th
 * NVIDIA H100: 2 nodes — 192 CPU, 8× H100 SXM (80 GB each), 1.9 TB RAM per node
 
 :::
+
+Iridis 7 is a new GPU cluster which is being rolled out over Autumn 2026.  Access is being opened to users while the system undergoes testing.
 
 You can find out more details about the system from the <a href="https://sotonac.sharepoint.com/teams/HPCCommunityWiki">HPC Community Wiki</a>, and to get access to the system there is a <a href="https://sotonac.sharepoint.com/teams/HPCCommunityWiki/SitePages/Connecting-to-Iridis5.aspx"> short application form</a> to be filled in.
 

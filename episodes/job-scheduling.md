@@ -4,7 +4,7 @@ teaching: 0 # teaching time in minutes
 exercises: 0 # exercise time in minutes
 ---
 
-:::::::::::::::::::::::::::::::::::::: questions
+::: questions
 
 - What is a job scheduler and why is it needed?
 - What is the difference between a login node and a compute node?
@@ -13,9 +13,9 @@ exercises: 0 # exercise time in minutes
 - How do I submit, monitor, and cancel a job?
 - How (and when) should I use an interactive job?
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
-::::::::::::::::::::::::::::::::::::: objectives
+::: objectives
 
 - Describe briefly what a job scheduler does
 - Contrast when to run programs on an HPC login node vs running them on a compute node
@@ -24,7 +24,7 @@ exercises: 0 # exercise time in minutes
 - Summarise how to submit a batch job and monitor it until completion
 - Summarise the process for requesting and using an interactive job
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
 An HPC cluster has thousands of nodes shared by many users. A job scheduler is the software that manages this, deciding who gets what resources and when. It ensures that tasks run efficiently and fairly, matching a job's resource request to available hardware. On Iridis, the scheduler is Slurm, but the concepts are transferable to other schedulers such as PBS.
 
@@ -99,7 +99,7 @@ NodeName=red6001 Arch=x86_64 CoresPerSocket=96
 This provides a detailed summary of the node, including the number of CPUs on it (CPUTot), if there are GPUs (Gres) as well as the state of the node (State), the current resources allocated to a user (CPUAlloc, AllocMem) and other
 interesting information.
 
-::::::::::::::::::::::::::::::::::::: callout
+::: callout
 
 ## The scavenger partition
 
@@ -107,7 +107,7 @@ The scavenger partition on Iridis allows you to use idle compute nodes that you 
 
 Because your job can be cancelled at any time, you should only use this partition for testing or for code that can save its progress (a technique known as [checkpointing](https://en.wikipedia.org/wiki/Application_checkpointing)). This way, you won't lose work if your job is preempted.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
 ## Job submission scripts
 
@@ -204,13 +204,13 @@ python my_script.py --input data/input.txt --output results/output.txt
 
 In this example, [python_job.sh](files/python_job.sh), we used the following script: [my_script.py](files/my_script.py). In the submission script, you will notice that we have used environment variables starting with `$SLURM_`. These are set by Slurm when a job starts running on a compute node. A complete list of them have be found in the [Slurm documentation](https://slurm.schedmd.com/sbatch.html#SECTION_OUTPUT-ENVIRONMENT-VARIABLES).
 
-::::::::::::::::::::::::::::::::::::: callout
+::: callout
 
 ## No internet access on compute nodes
 
 On Iridis, the compute nodes **do not** have access to the internet. If your job script tries to download files or access any online resource, it will hang and eventually fail. You should run any *short* tasks that require internet access (like downloading datasets) on the login nodes before you submit your job, or in an Iridis on Demand interactive session.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
 ## Submitting, monitoring and cancelling jobs
 
@@ -225,7 +225,7 @@ Submitted batch job 715860
 
 If all goes well, you should see some output which says "Submitted batch job" followed by a job ID, which a unique ID given to the job. We'll use this ID to manage our job such as checking the status of it or cancelling it.
 
-::::::::::::::::::::::::::::::::::::: callout
+::: callout
 
 ## Test your script before submitting it
 
@@ -233,7 +233,7 @@ It is always good practice to test your submission script before submitting a la
 
 A good way to do this is to submit a test job that requests minimal resources, for example: `--nodes=1`, `--cpus-per-task=1` and `--time=00:05:00`. These small, short jobs usually have a much shorter queue time. The goal is not to test your code at scale or get results; it is only to confirm that the script successfully loads its modules, finds its files, and launches the program without immediately failing. Another option would be to use the scavenger partition, which tends to have shorter queue times.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
 
 ### Monitoring jobs
 
@@ -303,7 +303,7 @@ We can also refine this to cancel only pending jobs, whilst letting running ones
 [iridis6]$ scancel -u $USER -t PENDING
 ```
 
-::::::::::::::::::::::::::::::::::::: challenge
+::: challenge
 
 ## Submit, monitor and cancel a Python example
 
@@ -311,7 +311,7 @@ Now try all of this yourself with the Python example from earlier in the episode
 
 Submit your job, check in on its status in the queue and then cancel it. The job should run for around five minutes, giving you enough time to do these three steps.
 
-::::::::::::::::::::::::::::::::::::: solution
+::: solution
 
 First, submit the `python_job.sh` script using the `sbatch` command.
 
@@ -334,8 +334,8 @@ Finally, cancel the job using `scancel` and the Job ID you noted.
 [iridis6]$ scancel 715861
 ```
 
-::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
+:::
 
 ## Interactive jobs
 
@@ -352,7 +352,7 @@ This will start an interactive session on the L4 partition on Iridis X, for 2 ho
 
 Once the interactive session has started, you are logged into the node the job has been allocated and you can run commands from as if it were a terminal session on your own computer. You can even use GUI applications as long as X-forwarding has been setup correctly.
 
-::::::::::::::::::::::::::::::::::::: keypoints
+::: keypoints
 
 - The job scheduler (like Slurm) manages all user jobs to ensure fair and efficient use of the cluster.
 - Login nodes are for light tasks (editing, compiling); compute nodes are for running scheduled, intensive jobs.
@@ -361,4 +361,4 @@ Once the interactive session has started, you are logged into the node the job h
 - Use `sbatch` to submit a job, `squeue` to monitor its status, and `scancel` to cancel it.
 - Use `sinteractive` to request a live terminal session on a compute node for debugging or interactive work.
 
-::::::::::::::::::::::::::::::::::::::::::::::::
+:::
