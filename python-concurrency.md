@@ -27,11 +27,13 @@ exercises: 0 # exercise time in minutes
 
 ## Concurrency and Parallelism
 
-Concurrency and parallelism in programming are ways to get a piece fo software to do multiple things at the same time. The two terms have subtly different meanings: parallelism is performing multiple tasks at the same time (for example, two processes working on different parts of a data set at the same time), while concurrency is the ability for a computation to pause tasks and resume them at a later time (for example, pausing a file download task while waiting for a server to respond and doing another computation instead).  You can have software which is concurrent but not parallel, and vice-versa.
+Concurrency and parallelism in programming are ways to get a piece of software to do multiple things at the same time. The two terms have subtly different meanings: parallelism is performing multiple tasks at the same time (for example, two processes working on different parts of a data set at the same time), while concurrency is the ability for a computation to pause tasks and resume them at a later time (for example, pausing a file download task while waiting for a server to respond and doing another computation instead).  You can have software which is concurrent but not parallel, and vice-versa.
 
 When your goal is wanting to make your code go faster, both concurrency and parallelism can be important, but typically come into play when you have different problems with speed: concurrency is important when you are *waiting* for something to happen, and parallelism is important when you want to *distribute* the work across multiple processing units.
 
 Both play a role in high-performance computing: for example when updating a deep neural network, you might *distribute* a batch across multiple GPUs to perform the forward computation, but you need to *wait* for all the results to be computed before you can do back propagation.
+
+However, in many cases the computations that you run into are ones that do not have a lot of waiting or communication between tasks. Indeed, often it is simply the need to perform the same computation on a bunch of different inputs, with no linking between each computation. This sort of trivially parallelisable code is sometimes called "embarrassingly parallel."
 
 ::: callout
 
@@ -53,9 +55,9 @@ It's likely that you'll be writing a lot of your code in Python. Python has a nu
 
 ### Threading and the Global Interpreter Lock (GIL)
 
-A thread is an operating-system level subprocess for computation which can be paused and restarted without needing direct intervention by the process which is running. It is a system for concurrency, but most operating systems will also allow different threads to run on different cores at the same time, so it is also a system which allows parallelism if the hardware can support it.  Since threads run inside a single process, they share the memory allocated to that process.  This means that threads within a program need to take care that they do not corrupt each other's data. There are a number of mechanisms that have been developed over the years to deal with this problem, and a common mechanism is a *lock*: a flag which can be sat by a thread to prevent access to a resource by other threads.
+A thread is an operating-system level subprocess for computation which can be paused and restarted without needing direct intervention by the process which is running. It is a system for concurrency, but most operating systems will also allow different threads to run on different cores at the same time, so it is also a system which allows parallelism if the hardware can support it.  Since threads run inside a single process, they share the memory allocated to that process.  This means that threads within a program need to take care that they do not corrupt each other's data. There are a number of mechanisms that have been developed over the years to deal with this problem, and a common mechanism is a *lock*: a flag which can be set by a thread to prevent access to a resource by other threads.
 
-Python provides access to operating-system threads. However a fundamental feature of Python for the last 30 years, ever since threading support was added, has been the so-called "Global Interpreter Lock" or "GIL".  This is a lock which prevents the internal state of the Python interpreter from being modified by two threads at the same time, which the Python interpreter acquires before it executes a Python virtual machine instruction, and releases after the bytecode is finished executing.  This global lock simplifies the Python interpreter's code and experimentally has been shown to generally be faster than the alternative of a system of fine-grained locks on individual pieces of data for single-threaded code.
+Python provides access to operating-system threads. However a fundamental feature of Python for the last 30 years, ever since threading support was added, has been the so-called "Global Interpreter Lock" or "GIL".  This is a lock which prevents the internal state of the Python interpreter from being modified by two threads at the same time, and which the Python interpreter acquires before it executes a Python virtual machine instruction, and releases after the bytecode is finished executing.  This global lock simplifies the Python interpreter's code and experimentally has been shown to generally be faster than the alternative of a system of fine-grained locks on individual pieces of data for single-threaded code.
 
 But it means that pure-Python threaded code is concurrent but *not* parallel. In practical terms what this means is that threading of pure Python code often doesn't speed things up, and may in fact slow things down: you can only execute one bytecode at a time across all the threads, and switching between threads has some performance cost.
 
@@ -79,9 +81,7 @@ Python provides language support for cooperative concurrency via the `async` and
 
 This simplifies the programming of these systems, because the fact that there is only one thing running at a time reduces the likelihood of race conditions and the need to acquire locks to gain control of a resource.  This is great for tasks which spend most of their time waiting for other things to do work, particularly I/O. Async is used heavily in Python networking software for this reason: most of the time each task is waiting for a remote client to respond.  Asyncio is very light-weight compared to threads so it is possible to have many more tasks active at a given time using asyncio compared to threading approaches.
 
-However async-based tasks are a poor choice for HPC, because most tasks are going to be working almost all the time: they are rarely waiting for other things to happen.  Using Python's async/await system for HPC effectively limits you to one core, and will likely be slower than if you simply performed the computation sequentially. Async code tends to really shine when doing things which require a lot of waiting, such as I/O or GUI code.
-
-To stretch our painting analogy, this approach is like having multiple painters but only one brush. When a painter gets tired they can pause painting their wall and rest while another painter paints different wall.  However the paintbrush is only exchanged when the current painter is done with it.
+However async-based programs are a poor choice for HPC, because most tasks are going to be working almost all the time: they are rarely waiting for other things to happen.  Using Python's async/await system for HPC effectively limits you to one core, and will likely be slower than if you simply performed the computation sequentially. Async code tends to really shine when doing things which require a lot of waiting, such as I/O or GUI code.
 
 ::: spoiler
 
@@ -89,9 +89,13 @@ To stretch our painting analogy, this approach is like having multiple painters 
 
 Two new features in recent and upcoming versions of Python promise some improvements to the way concurrency works in Python:
 
-- multiple interpreters: in Python 3.14 the `concurrent.interpreters` module was introduced which allows multiple Python interpreters to exist within a single process. When running in separate threads, different interpreters can execute truly in parallel as each has its own GIL. However they are limited in the way that they share memory in a similar way to Python's multiprocessing module. Nevertheless it holds the promise of being a more efficient replacement for multiprocessing, since it avoids the overhead of multiple processes.  Unfortunately some C extension modules need to be adapted with the possibility that they might be used by multiple interpreters.  At the time of writing a number of important packages, such as NumPy, Pillow and PyTorch, have not been adapted.
+#### Multiple interpreters
 
-- [free threading](https://py-free-threading.github.io/): in Python 3.13 support for building "free threaded" Python interpreters without the GIL was introduced with the intent that it will eventually become the default interpreter. The free-threaded interpreter is slightly slower when running sequential code, but significantly faster when running code that would have been locked by the GIL. However C extension modules (like NumPy, PyTorch, and many others) need modification to their C code to be safe to use with the free threaded builds of Python. At the time of writing, many of these packages have *experimental* support for free threading, but because of the need for custom builds of the interpreter it is probably too early to be using free-threaded Python for production work. In particular free-threaded Python is not available on Iridis.
+In Python 3.14 the `concurrent.interpreters` module was introduced which allows multiple Python interpreters to exist within a single process. When running in separate threads, different interpreters can execute truly in parallel as each has its own GIL. However they are limited in the way that they share memory in a similar way to Python's multiprocessing module. Nevertheless it holds the promise of being a more efficient replacement for multiprocessing, since it avoids the overhead of multiple processes.  Unfortunately some C extension modules need to be adapted with the possibility that they might be used by multiple interpreters.  At the time of writing a number of important packages, such as NumPy, Pillow and PyTorch, have not been adapted.
+
+#### Free threading
+
+In Python 3.13 support for building a ["free threaded"](https://py-free-threading.github.io/) Python interpreter with no GIL was introduced with the intent that it will eventually become the default interpreter. The free-threaded interpreter is slightly slower when running sequential code, but significantly faster when running code that would have been slowed by the GIL. However C extension modules (like NumPy, PyTorch, and many others) need modification to their C code to be safe to use with the free threaded builds of Python. At the time of writing, many of these packages have *experimental* support for free threading, but because of the need for custom builds of the interpreter it is probably too early to be using free-threaded Python for production work. In particular free-threaded Python is not available on Iridis.
 
 :::
 
@@ -101,17 +105,17 @@ Two new features in recent and upcoming versions of Python promise some improvem
 
 To understand the differences between the different approaches to concurrency in Python, we can take our analogy of painting a room, and stretch it a little:
 
-### Threaded Python
+#### Threaded Python
 
 Threaded Python is a bit like having several painters, but only one brush. After each stroke of paint, the painter puts the brush down, and then any of the painters can pick it up. But only one painter is ever painting at a time.
 
-C code which releases the GIL is like each painter having a paint roller in addition to the shared brush. The painter can paint a lot of the wall quickly, and the painters can use their rollers to paint at the same time, but they still need the shared brush to do touch-up work in the corners.
+C code which releases the GIL is like each painter having a paint roller in addition to the shared brush. Each painter can paint a lot of their wall quickly, and the painters can use their rollers to paint independently at the same time, but they still need the shared brush to do touch-up work.
 
-### Multiprocess Python
+#### Multiprocess Python
 
 This is a bit like having several painters who can paint their walls independently, but there isn't much sharing: they all have their own paint tin and ladders and drop cloths and all the other equipment that they need to do the task, and they all need to fit it into the room where they are working.
 
-### Async Python
+#### Async Python
 
 This is like having several painters, but only one brush. Instead of putting the brush down after each stroke, each painter paints as much as they want before putting the brush down. A painter could potentially pain their entire wall before letting go of the brush.
 
@@ -119,9 +123,7 @@ This is like having several painters, but only one brush. Instead of putting the
 
 ## Practical Advice
 
-On its own the standard version of Python (which written in C and so is sometimes called CPython) is a poor language for HPC: it is slow and doesn't support parallelism very well.
-
-What makes Python such a popular language for HPC is that it is easy to extend with C, C++ or Fortran code allowing you to do your computation in those fast languages and in parallel if needed by releasing the GIL.
+On its own the standard version of Python (which written in C and so is sometimes called CPython) is a poor language for HPC: it is slow and doesn't support parallelism very well.  What makes Python such a popular language for HPC is that it is easy to extend with C, C++ or Fortran code allowing you to do your computation in those fast languages and in parallel if needed by releasing the GIL.
 
 But more importantly there is an extensive, high-quality collection of extension libraries like Pillow (which wraps various C image format libraries), NumPy (which wraps linear algebra libraries like BLAS), SciPy (which wraps many C and Fortran computational libraries), and PyTorch (which wraps GPU code) that interoperate really well.
 
@@ -281,6 +283,8 @@ Inspection of the results tells us that about 1/2 of the time is being spent man
 
 ### Profiling Python Code
 
+Profiling the performance of Python code is a deep enough topic to deserve its own course.
+
 Python has two profilers as part of the standard Python library: `profile` and `cProfile`. These have the same interface and behave the same way, but `cProfile` is written as a C extension model and so is faster with less overhead. You should always use `cProfile` when available.
 
 The Python profilers work by adding a hook that gets executed at the start of every function call, which allows them to gather timing information, but at the cost of adding significant runtime overhead: code runs 2-5 times slower when being profiled.
@@ -403,7 +407,7 @@ How long does it take to run the code on your machine?
 
 :::
 
-::: callout
+::: spoiler
 
 ### Effort, Time and Flow
 
