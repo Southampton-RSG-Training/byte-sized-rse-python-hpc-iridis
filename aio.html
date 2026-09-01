@@ -1419,7 +1419,7 @@ to do these three steps.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>First, submit the <code>python_job.sh</code> script using the
 <code>sbatch</code> command.</p>
@@ -1564,7 +1564,7 @@ and <code>mpi4py.futures</code>.</li>
 <section><h2 class="section-heading" id="concurrency-and-parallelism">Concurrency and Parallelism<a class="anchor" aria-label="anchor" href="#concurrency-and-parallelism"></a>
 </h2>
 <hr class="half-width">
-<p>Concurrency and parallelism in programming are ways to get a piece fo
+<p>Concurrency and parallelism in programming are ways to get a piece of
 software to do multiple things at the same time. The two terms have
 subtly different meanings: parallelism is performing multiple tasks at
 the same time (for example, two processes working on different parts of
@@ -1584,6 +1584,12 @@ updating a deep neural network, you might <em>distribute</em> a batch
 across multiple GPUs to perform the forward computation, but you need to
 <em>wait</em> for all the results to be computed before you can do back
 propagation.</p>
+<p>However, in many cases the computations that you run into are ones
+that do not have a lot of waiting or communication between tasks.
+Indeed, often it is simply the need to perform the same computation on a
+bunch of different inputs, with no linking between each computation.
+This sort of trivially parallelisable code is sometimes called
+“embarrassingly parallel.”</p>
 <div id="painting-a-room" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
@@ -1634,14 +1640,14 @@ process, they share the memory allocated to that process. This means
 that threads within a program need to take care that they do not corrupt
 each other’s data. There are a number of mechanisms that have been
 developed over the years to deal with this problem, and a common
-mechanism is a <em>lock</em>: a flag which can be sat by a thread to
+mechanism is a <em>lock</em>: a flag which can be set by a thread to
 prevent access to a resource by other threads.</p>
 <p>Python provides access to operating-system threads. However a
 fundamental feature of Python for the last 30 years, ever since
 threading support was added, has been the so-called “Global Interpreter
 Lock” or “GIL”. This is a lock which prevents the internal state of the
 Python interpreter from being modified by two threads at the same time,
-which the Python interpreter acquires before it executes a Python
+and which the Python interpreter acquires before it executes a Python
 virtual machine instruction, and releases after the bytecode is finished
 executing. This global lock simplifies the Python interpreter’s code and
 experimentally has been shown to generally be faster than the
@@ -1715,18 +1721,13 @@ Python networking software for this reason: most of the time each task
 is waiting for a remote client to respond. Asyncio is very light-weight
 compared to threads so it is possible to have many more tasks active at
 a given time using asyncio compared to threading approaches.</p>
-<p>However async-based tasks are a poor choice for HPC, because most
+<p>However async-based programs are a poor choice for HPC, because most
 tasks are going to be working almost all the time: they are rarely
 waiting for other things to happen. Using Python’s async/await system
 for HPC effectively limits you to one core, and will likely be slower
 than if you simply performed the computation sequentially. Async code
 tends to really shine when doing things which require a lot of waiting,
 such as I/O or GUI code.</p>
-<p>To stretch our painting analogy, this approach is like having
-multiple painters but only one brush. When a painter gets tired they can
-pause painting their wall and rest while another painter paints
-different wall. However the paintbrush is only exchanged when the
-current painter is done with it.</p>
 <div id="accordionSpoiler1" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
@@ -1736,33 +1737,37 @@ current painter is done with it.</p>
 <div class="accordion-body">
 <p>Two new features in recent and upcoming versions of Python promise
 some improvements to the way concurrency works in Python:</p>
-<ul>
-<li><p>multiple interpreters: in Python 3.14 the
-<code>concurrent.interpreters</code> module was introduced which allows
-multiple Python interpreters to exist within a single process. When
-running in separate threads, different interpreters can execute truly in
-parallel as each has its own GIL. However they are limited in the way
-that they share memory in a similar way to Python’s multiprocessing
-module. Nevertheless it holds the promise of being a more efficient
-replacement for multiprocessing, since it avoids the overhead of
-multiple processes. Unfortunately some C extension modules need to be
-adapted with the possibility that they might be used by multiple
-interpreters. At the time of writing a number of important packages,
-such as NumPy, Pillow and PyTorch, have not been adapted.</p></li>
-<li><p><a href="https://py-free-threading.github.io/" class="external-link">free
-threading</a>: in Python 3.13 support for building “free threaded”
-Python interpreters without the GIL was introduced with the intent that
-it will eventually become the default interpreter. The free-threaded
-interpreter is slightly slower when running sequential code, but
-significantly faster when running code that would have been locked by
-the GIL. However C extension modules (like NumPy, PyTorch, and many
-others) need modification to their C code to be safe to use with the
-free threaded builds of Python. At the time of writing, many of these
-packages have <em>experimental</em> support for free threading, but
-because of the need for custom builds of the interpreter it is probably
-too early to be using free-threaded Python for production work. In
-particular free-threaded Python is not available on Iridis.</p></li>
-</ul>
+<div class="section level4">
+<h4 id="multiple-interpreters">Multiple interpreters<a class="anchor" aria-label="anchor" href="#multiple-interpreters"></a>
+</h4>
+<p>In Python 3.14 the <code>concurrent.interpreters</code> module was
+introduced which allows multiple Python interpreters to exist within a
+single process. When running in separate threads, different interpreters
+can execute truly in parallel as each has its own GIL. However they are
+limited in the way that they share memory in a similar way to Python’s
+multiprocessing module. Nevertheless it holds the promise of being a
+more efficient replacement for multiprocessing, since it avoids the
+overhead of multiple processes. Unfortunately some C extension modules
+need to be adapted with the possibility that they might be used by
+multiple interpreters. At the time of writing a number of important
+packages, such as NumPy, Pillow and PyTorch, have not been adapted.</p>
+</div>
+<div class="section level4">
+<h4 id="free-threading">Free threading<a class="anchor" aria-label="anchor" href="#free-threading"></a>
+</h4>
+<p>In Python 3.13 support for building a <a href="https://py-free-threading.github.io/" class="external-link">“free threaded”</a> Python
+interpreter with no GIL was introduced with the intent that it will
+eventually become the default interpreter. The free-threaded interpreter
+is slightly slower when running sequential code, but significantly
+faster when running code that would have been slowed by the GIL. However
+C extension modules (like NumPy, PyTorch, and many others) need
+modification to their C code to be safe to use with the free threaded
+builds of Python. At the time of writing, many of these packages have
+<em>experimental</em> support for free threading, but because of the
+need for custom builds of the interpreter it is probably too early to be
+using free-threaded Python for production work. In particular
+free-threaded Python is not available on Iridis.</p>
+</div>
 </div>
 </div>
 </div>
@@ -1778,31 +1783,31 @@ particular free-threaded Python is not available on Iridis.</p></li>
 <p>To understand the differences between the different approaches to
 concurrency in Python, we can take our analogy of painting a room, and
 stretch it a little:</p>
-<div class="section level3">
-<h3 id="threaded-python">Threaded Python<a class="anchor" aria-label="anchor" href="#threaded-python"></a>
-</h3>
+<div class="section level4">
+<h4 id="threaded-python">Threaded Python<a class="anchor" aria-label="anchor" href="#threaded-python"></a>
+</h4>
 <p>Threaded Python is a bit like having several painters, but only one
 brush. After each stroke of paint, the painter puts the brush down, and
 then any of the painters can pick it up. But only one painter is ever
 painting at a time.</p>
 <p>C code which releases the GIL is like each painter having a paint
-roller in addition to the shared brush. The painter can paint a lot of
-the wall quickly, and the painters can use their rollers to paint at the
-same time, but they still need the shared brush to do touch-up work in
-the corners.</p>
+roller in addition to the shared brush. Each painter can paint a lot of
+their wall quickly, and the painters can use their rollers to paint
+independently at the same time, but they still need the shared brush to
+do touch-up work.</p>
 </div>
-<div class="section level3">
-<h3 id="multiprocess-python">Multiprocess Python<a class="anchor" aria-label="anchor" href="#multiprocess-python"></a>
-</h3>
+<div class="section level4">
+<h4 id="multiprocess-python">Multiprocess Python<a class="anchor" aria-label="anchor" href="#multiprocess-python"></a>
+</h4>
 <p>This is a bit like having several painters who can paint their walls
 independently, but there isn’t much sharing: they all have their own
 paint tin and ladders and drop cloths and all the other equipment that
 they need to do the task, and they all need to fit it into the room
 where they are working.</p>
 </div>
-<div class="section level3">
-<h3 id="async-python-1">Async Python<a class="anchor" aria-label="anchor" href="#async-python-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="async-python-1">Async Python<a class="anchor" aria-label="anchor" href="#async-python-1"></a>
+</h4>
 <p>This is like having several painters, but only one brush. Instead of
 putting the brush down after each stroke, each painter paints as much as
 they want before putting the brush down. A painter could potentially
@@ -1817,11 +1822,10 @@ pain their entire wall before letting go of the brush.</p>
 <hr class="half-width">
 <p>On its own the standard version of Python (which written in C and so
 is sometimes called CPython) is a poor language for HPC: it is slow and
-doesn’t support parallelism very well.</p>
-<p>What makes Python such a popular language for HPC is that it is easy
-to extend with C, C++ or Fortran code allowing you to do your
-computation in those fast languages and in parallel if needed by
-releasing the GIL.</p>
+doesn’t support parallelism very well. What makes Python such a popular
+language for HPC is that it is easy to extend with C, C++ or Fortran
+code allowing you to do your computation in those fast languages and in
+parallel if needed by releasing the GIL.</p>
 <p>But more importantly there is an extensive, high-quality collection
 of extension libraries like Pillow (which wraps various C image format
 libraries), NumPy (which wraps linear algebra libraries like BLAS),
@@ -2077,6 +2081,8 @@ split with more time spent on</p>
 </button>
 <div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
+<p>Profiling the performance of Python code is a deep enough topic to
+deserve its own course.</p>
 <p>Python has two profilers as part of the standard Python library:
 <code>profile</code> and <code>cProfile</code>. These have the same
 interface and behave the same way, but <code>cProfile</code> is written
@@ -2336,14 +2342,13 @@ eventually be a bottleneck due to disk I/O bandwidth.</p>
 </div>
 </div>
 </div>
-<div id="effort-time-and-flow" class="callout">
-<div class="callout-square">
-<i class="callout-icon" data-feather="bell"></i>
-</div>
-<span class="callout-header">Callout</span>
-<div id="effort-time-and-flow" class="callout-inner">
-<h3 class="callout-title">Effort, Time and Flow</h3>
-<div class="callout-content">
+<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
+<div class="accordion-item">
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
+  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Effort, Time and Flow </h3>
+</button>
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div class="accordion-body">
 <p>In this toy example we spend a fair bit of effort to reduce the run
 time from 4 minutes to about 40 seconds: we had to profile and run
 multiple experiments to see what would work. Obviously this would make
@@ -2370,6 +2375,7 @@ speedup.</p>
 now reached a point where you might go and get a cup of tea while you
 wait, but you can keep your mind on task with a little effort, so you’ve
 taken a 30 minute interruption down to only 5.</p>
+</div>
 </div>
 </div>
 </div>
@@ -2481,12 +2487,12 @@ from a batch script which looks like:</p>
 <span id="cb19-30"><a href="#cb19-30" tabindex="-1" aria-label="code-block-19-30"></a><span class="ex">deactivate</span></span>
 <span id="cb19-31"><a href="#cb19-31" tabindex="-1" aria-label="code-block-19-31"></a><span class="ex">module</span> purge</span></code></pre>
 </div>
-<div id="accordionSpoiler5" class="accordion spoiler-accordion accordion-flush">
+<div id="accordionSpoiler6" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
-<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
-  <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Disabling TQDM </h3>
+<button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler6" aria-expanded="false" aria-controls="collapseSpoiler6">
+  <h3 class="accordion-header" id="headingSpoiler6">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Disabling TQDM </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
+<div id="collapseSpoiler6" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler6" aria-labelledby="headingSpoiler6">
 <div class="accordion-body">
 <p>By prepending <code>TQDM_DISABLE=1</code> to the Python command, we
 turn off the progress bar, which is not really appropriate for batch
@@ -2726,7 +2732,7 @@ additional nodes in this case, and the work is starting to be I/O bound
 rather than CPU bound with the slower storage. But the step from single
 node to multinode is very easy, and for more computationaly expensive
 code, you will see a speed-up.</p>
-<div id="callout4" class="callout">
+<div id="callout3" class="callout">
 <div class="callout-square">
 <i class="callout-icon" data-feather="bell"></i>
 </div>
