@@ -30,7 +30,7 @@ for installing Python in preparation for undertaking their Python lesson.
 
 You will need access to Iridis for this session.
 
-If you do not have access to Iridis, the process of getting access to the system is straight forward for University of Southampton Staff and Students. Use of the system is *free* at the point of use, and there is a [short application form](https://sotonac.sharepoint.com/teams/HPCCommunityWiki/SitePages/Connecting-to-Iridis.aspx) to be filled in.
+If you do not have access to Iridis, the process of getting access to the system is straightforward for University of Southampton Staff and Students. Use of the system is *free* at the point of use, and there is a [short application form](https://sotonac.sharepoint.com/teams/HPCCommunityWiki/SitePages/Connecting-to-Iridis.aspx) to be filled in.
 
 You will also need to ensure that you have an SSH client installed on your system, and have set up your SSH keys for Iridis as described in the above wiki page.
 
