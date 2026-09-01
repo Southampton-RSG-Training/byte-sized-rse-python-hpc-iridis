@@ -327,7 +327,7 @@
         
 <section id="aio-intro-to-hpc"><p>Content from <a href="intro-to-hpc.html">Introduction to HPC Systems</a></p>
 <hr>
-<p>Last updated on 2026-08-03 |
+<p>Last updated on 2026-09-01 |
 
         <a href="https://github.com/Southampton-RSG-Training/byte-sized-rse-python-hpc-iridis/edit/main/episodes/intro-to-hpc.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 0 minutes</p>
@@ -438,7 +438,7 @@ and output can be done using data stored on Disk or on a Network
 </tr></table>
 </div>
 <div class="section level3">
-<h3 id="if-our-pc-isnt-powerful-enough">If Our PC isnt Powerful Enough?<a class="anchor" aria-label="anchor" href="#if-our-pc-isnt-powerful-enough"></a>
+<h3 id="if-our-pc-isnt-powerful-enough">If Our PC isn’t Powerful Enough?<a class="anchor" aria-label="anchor" href="#if-our-pc-isnt-powerful-enough"></a>
 </h3>
 <figure><img src="../fig/server.svg" style="width:20.0%" alt="Outsourcing Computational Tasks: many of the tasks we perform daily using computers are outsourced to remote servers" class="figure mx-auto d-block"><div class="figcaption">Outsourcing Computational Tasks: many of the
 tasks we perform daily using computers are outsourced to remote
@@ -669,11 +669,12 @@ grant process.</p>
 </h2>
 <hr class="half-width">
 <div class="section level3">
-<h3 id="iridis-6-iridis-x">Iridis 6 &amp; Iridis X<a class="anchor" aria-label="anchor" href="#iridis-6-iridis-x"></a>
+<h3 id="iridis-6-iridis-x-and-iridis-7">Iridis 6, Iridis X and Iridis 7<a class="anchor" aria-label="anchor" href="#iridis-6-iridis-x-and-iridis-7"></a>
 </h3>
 <p>The local tier 3 system at the University of Southampton is known as
-Iridis, which is comprised of two separate clusters known as
-<strong>Iridis 6</strong> &amp; and <strong>Iridis X</strong>.</p>
+Iridis, which is comprised of the clusters known as <strong>Iridis
+6</strong>, <strong>Iridis X</strong> and the new <strong>Iridis
+7</strong>.</p>
 <p>Iridis 6 is the University’s CPU based HPC cluster, intended for
 running large parallel, multi-node, CPU based workloads. It comprised of
 26,000+ AMD CPUs:</p>
@@ -766,6 +767,9 @@ per node</li>
 </div>
 </div>
 </div>
+<p>Iridis 7 is a new GPU cluster which is being rolled out over Autumn
+2026. Access is being opened to users while the system undergoes
+testing.</p>
 <p>You can find out more details about the system from the
 <a href="https://sotonac.sharepoint.com/teams/HPCCommunityWiki" class="external-link">HPC
 Community Wiki</a>, and to get access to the system there is a
@@ -803,7 +807,7 @@ any links that you are not going to use.
 </div>
 </section></section><section id="aio-job-scheduling"><p>Content from <a href="job-scheduling.html">Introduction to Job Scheduling</a></p>
 <hr>
-<p>Last updated on 2026-08-03 |
+<p>Last updated on 2026-09-01 |
 
         <a href="https://github.com/Southampton-RSG-Training/byte-sized-rse-python-hpc-iridis/edit/main/episodes/job-scheduling.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <p>Estimated time: <i aria-hidden="true" data-feather="clock"></i> 0 minutes</p>
@@ -1663,7 +1667,7 @@ than if you simply performed the computation sequentially.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler1" aria-expanded="false" aria-controls="collapseSpoiler1">
   <h3 class="accordion-header" id="headingSpoiler1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> The Future </h3>
 </button>
-<div id="collapseSpoiler1" class="accordion-collapse collapse" aria-labelledby="headingSpoiler1" data-bs-parent="#accordionSpoiler1">
+<div id="collapseSpoiler1" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler1" aria-labelledby="headingSpoiler1">
 <div class="accordion-body">
 <p>Two new features in recent and upcoming versions of Python promise
 some improvements to the way concurrency works in Python:</p>
@@ -1771,7 +1775,7 @@ processes, or nodes as needed.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler2" aria-expanded="false" aria-controls="collapseSpoiler2">
   <h3 class="accordion-header" id="headingSpoiler2">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> OpenMP </h3>
 </button>
-<div id="collapseSpoiler2" class="accordion-collapse collapse" aria-labelledby="headingSpoiler2" data-bs-parent="#accordionSpoiler2">
+<div id="collapseSpoiler2" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler2" aria-labelledby="headingSpoiler2">
 <div class="accordion-body">
 <p>Another common way of parallelising HPC code is the OpenMP library.
 This doesn’t make sense for pure Python code, but C extensions can make
@@ -1856,7 +1860,7 @@ computation and a lot of reading and writing to/from the filesystem.</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler3" aria-expanded="false" aria-controls="collapseSpoiler3">
   <h3 class="accordion-header" id="headingSpoiler3">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> click and tqdm </h3>
 </button>
-<div id="collapseSpoiler3" class="accordion-collapse collapse" aria-labelledby="headingSpoiler3" data-bs-parent="#accordionSpoiler3">
+<div id="collapseSpoiler3" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler3" aria-labelledby="headingSpoiler3">
 <div class="accordion-body">
 <p>This script uses a couple of third-party libraries that make the
 script more ergonomic to use.</p>
@@ -1962,7 +1966,7 @@ split with more time spent on</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
   <h3 class="accordion-header" id="headingSpoiler4">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Profiling Python Code </h3>
 </button>
-<div id="collapseSpoiler4" class="accordion-collapse collapse" aria-labelledby="headingSpoiler4" data-bs-parent="#accordionSpoiler4">
+<div id="collapseSpoiler4" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler4" aria-labelledby="headingSpoiler4">
 <div class="accordion-body">
 <p>Python has two profilers as part of the standard Python library:
 <code>profile</code> and <code>cProfile</code>. These have the same
@@ -2093,11 +2097,11 @@ to the Python GIL becoming the bottleneck.</p>
 </tr>
 </tbody>
 </table>
-<div id="running-the-threaded-code" class="callout discussion">
+<div id="running-the-threaded-code" class="callout challenge">
 <div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
+<i class="callout-icon" data-feather="zap"></i>
 </div>
-<span class="callout-header">Discussion</span>
+<span class="callout-header">Challenge</span>
 <div id="running-the-threaded-code" class="callout-inner">
 <h3 class="callout-title">Running the Threaded Code</h3>
 <div class="callout-content">
@@ -2199,11 +2203,11 @@ running with 8, for example).</p>
 <p>The result of this experiment is that running with even more cores on
 a larger machine would likely see continued improvement, but there will
 eventually be a bottleneck due to disk I/O bandwidth.</p>
-<div id="running-the-multiprocess-code" class="callout discussion">
+<div id="running-the-multiprocess-code" class="callout challenge">
 <div class="callout-square">
-<i class="callout-icon" data-feather="message-circle"></i>
+<i class="callout-icon" data-feather="zap"></i>
 </div>
-<span class="callout-header">Discussion</span>
+<span class="callout-header">Challenge</span>
 <div id="running-the-multiprocess-code" class="callout-inner">
 <h3 class="callout-title">Running the Multiprocess Code</h3>
 <div class="callout-content">
@@ -2373,7 +2377,7 @@ from a batch script which looks like:</p>
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler5" aria-expanded="false" aria-controls="collapseSpoiler5">
   <h3 class="accordion-header" id="headingSpoiler5">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="eye"></i></div> Disabling TQDM </h3>
 </button>
-<div id="collapseSpoiler5" class="accordion-collapse collapse" aria-labelledby="headingSpoiler5" data-bs-parent="#accordionSpoiler5">
+<div id="collapseSpoiler5" class="accordion-collapse collapse" data-bs-parent="#accordionSpoiler5" aria-labelledby="headingSpoiler5">
 <div class="accordion-body">
 <p>By prepending <code>TQDM_DISABLE=1</code> to the Python command, we
 turn off the progress bar, which is not really appropriate for batch
@@ -2399,7 +2403,7 @@ code.</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution1" aria-expanded="false" aria-controls="collapseSolution1">
   <h4 class="accordion-header" id="headingSolution1"> Show me the solution </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
 <div class="accordion-body">
 <p>On the Iridis 6 login node run:</p>
 <div class="codewrapper sourceCode" id="cb20">
@@ -2593,7 +2597,7 @@ than writing new files. This may take a few seconds:</p>
 <button class="accordion-button solution-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolution2" aria-expanded="false" aria-controls="collapseSolution2">
   <h4 class="accordion-header" id="headingSolution2"> Show me the solution </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
 <div class="accordion-body">
 <p>On the Iridis 6 login node run:</p>
 <div class="codewrapper sourceCode" id="cb29">
@@ -2637,7 +2641,7 @@ workers, you may need to learn how to program MPI at this level.</p>
 <button class="accordion-button instructor-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInstructor1" aria-expanded="false" aria-controls="collapseInstructor1">
   <h3 class="accordion-header" id="headingInstructor1">  <div class="note-square"><i aria-hidden="true" class="callout-icon" data-feather="edit-2"></i></div> The “Happy Path” of concurrent.futures </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
 <div class="accordion-body">
 <p>Emphasise the ease with which the learners can go from working, local
 code to working single-node code, to working multi-node code with just a
@@ -2710,7 +2714,7 @@ any links that you are not going to use.
         <p>Materials licensed under <a href="LICENSE.html">CC-BY 4.0</a> by the authors</p>
 
         <p>Template licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="external-link">CC-BY 4.0</a> by <a href="https://carpentries.org/" class="external-link">The Carpentries</a></p>
-        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/" class="external-link">sandpaper (0.20.2)</a>, <a href="https://github.com/carpentries/pegboard/tree/" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/" class="external-link">varnish (1.1.1)</a></p>
+        <p>Built with <a href="https://github.com/carpentries/sandpaper/tree/" class="external-link">sandpaper (0.21.0)</a>, <a href="https://github.com/carpentries/pegboard/tree/" class="external-link">pegboard (0.7.9)</a>, and <a href="https://github.com/carpentries/varnish/tree/" class="external-link">varnish (1.1.2)</a></p>
 		</div>
 		</footer>
 </div> <!-- / div.container -->
@@ -2733,8 +2737,8 @@ any links that you are not going to use.
   "url": "https://Southampton-RSG-Training.github.io/byte-sized-rse-python-hpc-iridis/instructor/aio.html",
   "identifier": "https://Southampton-RSG-Training.github.io/byte-sized-rse-python-hpc-iridis/instructor/aio.html",
   "dateCreated": "2026-09-03",
-  "dateModified": "2026-08-25",
-  "datePublished": "2026-08-25"
+  "dateModified": "2026-09-01",
+  "datePublished": "2026-09-01"
 }
 
   </script><script>
