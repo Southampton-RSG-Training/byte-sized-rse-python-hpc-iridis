@@ -174,7 +174,7 @@ A more complete submission script, for running a Python script, would look somet
 
 #SBATCH --job-name=python-example
 #SBATCH --partition=batch
-#SBATCH --time=04:00:00
+#SBATCH --time=00:01:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -199,7 +199,7 @@ export PYTHONUNBUFFERED=1
 cd $SLURM_SUBMIT_DIR
 
 # Run the Python script
-python my_script.py --input data/input.txt --output results/output.txt
+python my_script.py
 ```
 
 In this example, [python_job.sh](files/python_job.sh), we used the following script: [my_script.py](files/my_script.py). In the submission script, you will notice that we have used environment variables starting with `$SLURM_`. These are set by Slurm when a job starts running on a compute node. A complete list of them have be found in the [Slurm documentation](https://slurm.schedmd.com/sbatch.html#SECTION_OUTPUT-ENVIRONMENT-VARIABLES).

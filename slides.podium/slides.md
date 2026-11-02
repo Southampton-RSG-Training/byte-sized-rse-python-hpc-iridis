@@ -94,14 +94,23 @@ pwd
 
 ---
 
+# Parallel Tasks
+
+- if you have multiple tasks the batch script only runs in the main task. To execute in parallel in multiple tasks you need to prefix your main command with `srun`
+- you can inspect environment variables to see which task and node the code is running
+- in Python use `os.environ.get("SLURM_PROCID")` to get the index of your task.
+- other useful environment variables include `SLURM_NODEID`, `SLURM_LOCALID`, and `SLURM_NTASKS`.
+
+---
+
 ```bash
 #!/bin/bash
 
 #SBATCH --job-name=python-example
 #SBATCH --partition=batch
-#SBATCH --time=04:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --time=00:10:00
+#SBATCH --nodes=2
+#SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
 
 # Load required modules
@@ -116,8 +125,8 @@ export PYTHONUNBUFFERED=1
 # Move to job directory
 cd $SLURM_SUBMIT_DIR
 
-# Run the Python script
-python my_script.py
+# Run the Python script on multiple nodes
+srun python my_script.py
 ```
 
 ---
@@ -139,6 +148,7 @@ python my_script.py
 - For Python code, MPI4Py is the current best option for using MPI.
 - Basic MPI is fairly low-level and intrusive to your code.
 - We will use a different approach via Python's `concurrent.futures` module. This permits almost identical code to be run locally and with MPI.
+- To run code using MPI, you need to use the `mpirun` command.
 
 ---
 
