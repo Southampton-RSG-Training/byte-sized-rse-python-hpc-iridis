@@ -25,12 +25,30 @@ class: title reverse
 
 # High Performance Computing Basics
 
+
+.left-column[
+
 - An HPC cluster is a group of powerful computers dedicated to computational tasks
 - Each individual computer or 'node' is more powerful than a typical workstation
 - A cluster will have shared high-performance disk storage
+]
+.right-column[
+  ![](HPC.png)
+]
+
+---
+
+# The HPC World
+
+.left-column[
+
 - In the UK HPC facilities are ranked in Tiers from local to continental
 - Iridis is Southampton's local HPC facility
 - It consists of 3 clusters: Iridis 6, Iridis X and Iridis 7
+]
+.right-column[
+  ![](tiers.png)
+]
 
 ???
 
@@ -40,13 +58,44 @@ class: title reverse
 
 # Accessing Iridis
 
-- You need an account on Iridis.
-- Access to Iridis is through secure shell (SSH) to a login node.
-- The login node is a Linux computer where you can perform short, small tasks.
+.left-column[
+
+From the Bash command-line:
+``` bash
+$ ssh login6001.iridis.soton.ac.uk
+
+	###########################
+
+        WELCOME TO IRIDIS 6
+
+	###########################
+
+Last login: Mon Nov 16 15:01:31 2026
+[user@login6001 ~]$
+```
+Or use an SSH client like PuTTY.
+]
+.right-column[
+
+- Access to Iridis is through secure shell (SSH) to a login node from inside the University of Southampton's network or by VPN.
+- The login node is a powerful Linux computer shared by many users where you can perform short, small tasks.
+]
+
+---
+
+# Job Scheduling
+
+
+.left-column[
+
 - You can run HPC batch jobs using the SLURM scheduler and the `sbatch` command.
 - Jobs are configured with a BASH **submission script**
 - You can also request a short interactive session with the `sinteractive` command.
+]
+.right-column[
 
+  ![](restaurant_queue_manager.svg)
+]
 ???
 
 -
@@ -157,8 +206,7 @@ srun python my_script.py
 - Research code requires a lot of experimentation.
 - The faster your experiments fail, the quicker you can work out what is wrong.
 - HPC batch systems have long turn-around times.
-- Ideally, get code working *locally* first, then run the *same* code under HPC and scale up.
-- Make your code as fast as possible before moving to HPC.
+- Get code working *locally* first, make it as efficient as practical, and then run the *same* code under HPC and scale up.
 
 ---
 
