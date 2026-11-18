@@ -117,7 +117,7 @@ This is a bit like having several painters who can paint their walls independent
 
 #### Async Python
 
-This is like having several painters, but only one brush. Instead of putting the brush down after each stroke, each painter paints as much as they want before putting the brush down. A painter could potentially pain their entire wall before letting go of the brush.
+This is like having several painters, but only one brush. Instead of putting the brush down after each stroke, each painter paints as much as they want before putting the brush down. A painter could potentially paint their entire wall before letting go of the brush.
 
 :::
 
@@ -185,12 +185,6 @@ def augment_image(
 Then there is a main function which finds all the image files in the input directory and calls the `augment_image` function for all of them.
 
 ``` python
-@click.command()
-@click.argument(
-    "input_dir",
-    default=Path("flowers-102/jpg"),
-    type=click.Path(dir_okay=True, file_okay=False, exists=True),
-)
 def main(input_dir):
     from tqdm import tqdm
     from time import perf_counter
@@ -226,7 +220,7 @@ We need to create a Python environment with our dependencies.
 ``` bash
 $ python3.14 -m venv venv
 $ source venv/bin/activate
-(venv)$ cd data_augmentation
+(venv)$ cd byte-sized-rse-python-hpc-example
 (venv)$ pip install -U pip
 (venv)$ pip install --requirements-from-script image_augmentation.py
 ```
@@ -236,7 +230,7 @@ We also need a local copy of the Oxford Flower Dataset. There is a script that w
 (venv)$ python download_images.py
 ```
 
-This should create a `flowers-102/jpg` directory containing the images we will be working with. There are about 8000 images of flowers.
+This should create a `flowers-102` directory containing the images we will be working with. There are about 1000 images of flowers.
 
 :::
 
@@ -244,7 +238,7 @@ This should create a `flowers-102/jpg` directory containing the images we will b
 
 We can now run the script on the flower dataset:
 ``` bash
-(venv)$ python augment_images.py flowers-102/jpg
+(venv)$ python augment_images.py
 ```
 
 How long does it take to run on your machine?
@@ -253,11 +247,11 @@ How long does it take to run on your machine?
 
 ### Profiling Performance
 
-On an MacBook Pro M5 it takes about 130 seconds to run the code as-is. But the CPU is far from fully utilized, so we can potentially do this faster.
+On an MacBook Pro M5 it takes about 130 seconds to run the code as-is on 8000 images. But the CPU is far from fully utilized, so we can potentially do this faster.
 
 The first step when parallelizing is to determine whether the CPU is the bottleneck or whether storage is.  We can do this in Python by running using the profiler:
 ``` bash
-python -m cProfile -s cumulative augment_images.py flowers-102/jpg | more
+python -m cProfile -s cumulative augment_images.py | more
 ```
 This allows you to see which functions are using the most time
 This can be inspected using the standard library `pstats` module, or more elegantly with tools like SnakeViz.
@@ -277,7 +271,7 @@ Time taken: 640.44s
     81890  101.019    0.001  101.019    0.001 {method 'encode_to_file' of 'ImagingEncoder' objects}
 ```
 
-Inspection of the results tells us that about 1/2 of the time is being spent manipulating and encoding the images, and the remaining 1/2 of the time is spent on storage I/O.  Slower machines will likely show a split with more time spent on
+Inspection of the results tells us that about 1/2 of the time is being spent manipulating and encoding the images, and the remaining 1/2 of the time is spent on storage I/O.  Slower machines will likely show a split with more time spent on doing the image manipulation and encoding.
 
 ::: spoiler
 
@@ -400,7 +394,7 @@ Remove the output directory once again:
 Now run the multiprocess version of the script on your machine:
 
 ``` bash
-(venv)$ python augment_images_threading.py flowers-102/jpg
+(venv)$ python augment_images_threading.py
 ```
 
 How long does it take to run the code on your machine?
@@ -447,7 +441,7 @@ Since we're using python, we need to activate the python module:
 ```
 and then change directory to the source directory, and repeat the set-up for the python environment:
 ``` bash
-[login6003 ~]$ cd augment_images
+[login6003 ~]$ cd byte-sized-rse-python-hpc-example
 [login6003 augment_images]$ python3.14 -m venv venv
 [login6003 augment_images]$ source venv/bin/activate
 [login6003 augment_images] (venv)$ cd data_augmentation
