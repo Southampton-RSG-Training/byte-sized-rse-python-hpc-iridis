@@ -88,9 +88,9 @@ Or use an SSH client like PuTTY.
 
 .left-column[
 
-- You can run HPC batch jobs using the SLURM scheduler and the `sbatch` command.
-- Jobs are configured with a BASH **submission script**
-- You can also request a short interactive session with the `sinteractive` command.
+- Iridis uses the SLURM scheduler which allocates time for each user.
+- Work is configured with a **submission script** and run with the `sbatch` command
+- Interactive sessions are scheduled with the `sinteractive` command.
 ]
 .right-column[
 
@@ -134,6 +134,26 @@ pwd
 
 ---
 
+# Monitoring Jobs
+
+- The `squeue -u $USER` command shows you the state of your jobs.
+- You can get more detailed information about a job using `scontrol show jobid=` and the ID of your job
+- You can cancel a job using the `scancel` command with the ID of the job.
+- Output will appear in a text file starting with `slurm-` followed by the job number.
+- When complete, this file will contain error messages and performance feedback.
+
+---
+
+# Limits and Quotas
+
+- Iridis is a shared system, so there are limits on what individual users can do.
+- There are limits to the number of nodes, CPU and amount of memory that can be used.
+- There are limits to the size of data stored, and the number of files.
+- There are two places to store data: the `/home/$USER` directory (which is backed-up) and the `/scratch/$USER` directory (which is not).
+- Usage can be checked with the `myquota` command.
+
+---
+
 # Modules
 
 - Different HPC programs use different versions of underlying technologies
@@ -143,14 +163,83 @@ pwd
 
 ---
 
-# Parallel Tasks
+# Parallel Programming
 
-- if you have multiple tasks the batch script only runs in the main task. To execute in parallel in multiple tasks you need to prefix your main command with `srun`
-- you can inspect environment variables to see which task and node the code is running
-- in Python use `os.environ.get("SLURM_PROCID")` to get the index of your task.
-- other useful environment variables include `SLURM_NODEID`, `SLURM_LOCALID`, and `SLURM_NTASKS`.
+.left-column[
+
+- Some algorithms have multiple steps that don't depend on each other.
+
+``` python
+def double(i):
+    return 2 * i
+
+result = []
+for i in range(n_tasks):
+    result.append(double(i))
+```
+]
+.right-column[
+
+- These computations can be performed more quickly by distributing the work over multiple CPUs or computers.
+- Running in parallel adds complexity and has overhead.
+- Code should be as fast and efficient as possible before trying running in parallel.
+]
 
 ---
+
+# An Analogy: Painting a Room
+
+- A room needs to be painted as quickly as possible.
+- Painters can work in parallel to paint the room more quickly.
+- Difficulties which may occur:
+  - Communication, eg. who paints what?
+  - Usage of shared resources, eg. if there is only one tin of paint.
+  - Too many painters.
+  - Things which can't be sped up, eg. it takes time for paint to dry.
+- These are all analogous to problems that parallel code can have.
+
+
+---
+
+# Threads, Processes, and Tasks
+
+- a **task** is a unit of work in SLURM
+- each node might run multiple tasks
+- each task might start multiple **processes**
+- each process might run multiple **threads**
+- threads within a process share memory, so communication is fast
+- the total number of threads which can run at any time is equal to the number of CPU cores available
+- one task with multiple processes and/or threads often suffices
+
+---
+
+# Parallel Tasks
+
+- To run tasks in parallel, prefix with `srun` like so: `srun python my_script.py`
+- Environment variables give information for each task:
+  - `SLURM_PROCID` is the index or **rank**
+  - `SLURM_NTASKS` is the total number of tasks
+  - there are many other potentially useful variables
+- in Python use `os.environ.get` to get the value of an environment variable
+
+---
+
+# Example code
+
+[`my_script.py`](files/my_script.py)
+``` python
+import os
+
+print("Running on", os.environ.get("HOSTNAME"))
+print("NTASKS", os.environ.get("SLURM_NTASKS"))
+print("PROCID", os.environ.get("SLURM_PROCID"))
+print("NODEID", os.environ.get("SLURM_NODEID"))
+print("LOCALID", os.environ.get("SLURM_LOCALID"))
+```
+
+---
+
+# Example batch file
 
 ```bash
 #!/bin/bash
@@ -165,48 +254,76 @@ pwd
 # Load required modules
 module load python
 
-# Activate Python virtual environment
-source ~/myenv/bin/activate
-
-# Set any environment variables or configuration options
-export PYTHONUNBUFFERED=1
-
-# Move to job directory
-cd $SLURM_SUBMIT_DIR
-
 # Run the Python script on multiple nodes
 srun python my_script.py
 ```
 
 ---
 
-# Monitoring Jobs
+# Dividing Work
 
-- The `squeue -u $USER` command shows you the state of your jobs.
-- You can get more detailed information about a job using `scontrol show jobid=` and the ID of your job
-- You can cancel a job using the `scancel` command with the ID of the job.
-- Output will appear in a text file starting with `slurm-` followed by the job number.
-- When complete, this file will contain error messages and performance feedback.
+.left-column[
+
+- When using `srun` each task needs to work out what it will do.
+- In simple cases the rank can be used for this.
+- But often tasks will need to communicate to coordinate work or report results.
+]
+.right-column[
+
+``` python
+import os
+
+all_files = os.listdir('flowers-102')
+
+i = int(os.environ["SLURM_NODEID"])
+n = int(os.environ["SLURM_NTASKS"])
+
+# slice every nth file, starting at i
+# first gets 0, n, 2n, ...
+# second gets 1, n+1, 2n+1, ...
+# etc.
+task_files = all_files[i::n]
+
+for file in task_files:
+    augment_image(file)
+```
+]
 
 ---
 
 # MPI (Message Passing Interface)
 
-- When running jobs on multiple nodes you run into the issue of subdividing work.
 - MPI provides a way for nodes to communicate with each other.
-- For Python code, MPI4Py is the current best option for using MPI.
+- To run code using MPI:
+  - load OpenMPI: `module load openmpi`
+  - use `mpirun` instead of `srun`.
 - Basic MPI is fairly low-level and intrusive to your code.
-- We will use a different approach via Python's `concurrent.futures` module. This permits almost identical code to be run locally and with MPI.
-- To run code using MPI, you need to use the `mpirun` command.
+- Python's MPI4Py has a higher-level approach that uses `concurrent.futures` to allow almost identical code to be run both locally and with MPI.
+
+---
+
+### Why Python is Bad for HPC
+
+- Python is 5-10 times slower than C and consumes more memory.
+- Effective parallel code in Python is hard or resource-intensive.
+- Python environments use many small files.
+
+### Why Python is Good for HPC
+
+- Python was designed for "part-time programmers".
+- Python has an extensive and fast scientific library ecosystem.
+- Python is an excellent "glue" language to combine code from C, C++, Fortran, etc.
 
 ---
 
 # Effective Use of HPC
 
-- Research code requires a lot of experimentation.
-- The faster your experiments fail, the quicker you can work out what is wrong.
-- HPC batch systems have long turn-around times.
-- Get code working *locally* first, make it as efficient as practical, and then run the *same* code under HPC and scale up.
+- Research code requires a lot of experimentation. The faster your experiments fail, the quicker you can work out what is wrong.
+- HPC batch systems have long turn-around times so get code working *locally* first on a small subset for fast turn-around.
+- Make code as efficient as practical:
+  - Use NumPy, SciPy, Pandas, Pillow, OpenCV, etc. for speed.
+  - For algorithmic bottlenecks consider using Numba or Cython.
+- Run the *same* code under HPC and scale up as needed.
 
 ---
 
@@ -219,7 +336,7 @@ class: title reverse
 
 # Activity Introduction
 
-- We have code that prepares images for machine learning which we will prepare for running on Iridis 6.
+- We have code that prepares images for machine learning which we will modify to run on Iridis 6.
 - We'll demonstrate this via live coding.
   - We'll use a repository with example code.
 

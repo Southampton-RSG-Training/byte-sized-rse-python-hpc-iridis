@@ -1535,7 +1535,7 @@ any links that you are not going to use.
  -->
 </section></section><section id="aio-python-concurrency"><p>Content from <a href="python-concurrency.html">HPC with Python</a></p>
 <hr>
-<p>Last updated on 2026-09-01 |
+<p>Last updated on 2026-11-18 |
 
         <a href="https://github.com/Southampton-RSG-Training/byte-sized-rse-python-hpc-iridis/edit/main/episodes/python-concurrency.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
 <div class="text-end">
@@ -1833,7 +1833,7 @@ where they are working.</p>
 <p>This is like having several painters, but only one brush. Instead of
 putting the brush down after each stroke, each painter paints as much as
 they want before putting the brush down. A painter could potentially
-pain their entire wall before letting go of the brush.</p>
+paint their entire wall before letting go of the brush.</p>
 </div>
 </div>
 </div>
@@ -1968,22 +1968,16 @@ all of them.</p>
 <div class="codewrapper sourceCode" id="cb2">
 <h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="at">@click.command</span>()</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a><span class="at">@click.argument</span>(</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>    <span class="st">"input_dir"</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a>    default<span class="op">=</span>Path(<span class="st">"flowers-102/jpg"</span>),</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a>    <span class="bu">type</span><span class="op">=</span>click.Path(dir_okay<span class="op">=</span><span class="va">True</span>, file_okay<span class="op">=</span><span class="va">False</span>, exists<span class="op">=</span><span class="va">True</span>),</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a><span class="kw">def</span> main(input_dir):</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a>    <span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>    <span class="im">from</span> time <span class="im">import</span> perf_counter</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1" aria-label="code-block-2-11"></a>    t <span class="op">=</span> perf_counter()</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1" aria-label="code-block-2-12"></a>    DEFAULT_OUTPUT.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1" aria-label="code-block-2-13"></a>    paths <span class="op">=</span> <span class="bu">sorted</span>(Path(input_dir).glob(<span class="st">"*.jpg"</span>))</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1" aria-label="code-block-2-14"></a>    <span class="cf">for</span> path <span class="kw">in</span> tqdm(paths):</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1" aria-label="code-block-2-15"></a>        augment_image(path)</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1" aria-label="code-block-2-16"></a>    sys.stderr.write(<span class="ss">f"Time taken: </span><span class="sc">{</span>perf_counter() <span class="op">-</span> t<span class="sc">:.2f}</span><span class="ss">s</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1" aria-label="code-block-2-1"></a><span class="kw">def</span> main(input_dir):</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1" aria-label="code-block-2-2"></a>    <span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1" aria-label="code-block-2-3"></a>    <span class="im">from</span> time <span class="im">import</span> perf_counter</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1" aria-label="code-block-2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1" aria-label="code-block-2-5"></a>    t <span class="op">=</span> perf_counter()</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1" aria-label="code-block-2-6"></a>    DEFAULT_OUTPUT.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1" aria-label="code-block-2-7"></a>    paths <span class="op">=</span> <span class="bu">sorted</span>(Path(input_dir).glob(<span class="st">"*.jpg"</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1" aria-label="code-block-2-8"></a>    <span class="cf">for</span> path <span class="kw">in</span> tqdm(paths):</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1" aria-label="code-block-2-9"></a>        augment_image(path)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1" aria-label="code-block-2-10"></a>    sys.stderr.write(<span class="ss">f"Time taken: </span><span class="sc">{</span>perf_counter() <span class="op">-</span> t<span class="sc">:.2f}</span><span class="ss">s</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre>
 </div>
 <p>This is a somewhat interesting problem since it’s trivially
 parallelisable - every image can be dealt with independently of every
@@ -2029,7 +2023,7 @@ everything else.</p>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1" aria-label="code-block-3-1"></a><span class="ex">$</span> python3.14 <span class="at">-m</span> venv venv</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1" aria-label="code-block-3-2"></a><span class="ex">$</span> source venv/bin/activate</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> cd data_augmentation</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1" aria-label="code-block-3-3"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> cd byte-sized-rse-python-hpc-example</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1" aria-label="code-block-3-4"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> pip install <span class="at">-U</span> pip</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1" aria-label="code-block-3-5"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> pip install <span class="at">--requirements-from-script</span> image_augmentation.py</span></code></pre>
 </div>
@@ -2040,9 +2034,9 @@ script that will perform the installation:</p>
 </h3>
 <pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1" aria-label="code-block-4-1"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> python download_images.py</span></code></pre>
 </div>
-<p>This should create a <code>flowers-102/jpg</code> directory
-containing the images we will be working with. There are about 8000
-images of flowers.</p>
+<p>This should create a <code>flowers-102</code> directory containing
+the images we will be working with. There are about 1000 images of
+flowers.</p>
 </div>
 </div>
 </div>
@@ -2057,7 +2051,7 @@ images of flowers.</p>
 <div class="codewrapper sourceCode" id="cb5">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> python augment_images.py flowers-102/jpg</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1" aria-label="code-block-5-1"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> python augment_images.py</span></code></pre>
 </div>
 <p>How long does it take to run on your machine?</p>
 </div>
@@ -2066,16 +2060,16 @@ images of flowers.</p>
 <div class="section level3">
 <h3 id="profiling-performance">Profiling Performance<a class="anchor" aria-label="anchor" href="#profiling-performance"></a>
 </h3>
-<p>On an MacBook Pro M5 it takes about 130 seconds to run the code
-as-is. But the CPU is far from fully utilized, so we can potentially do
-this faster.</p>
+<p>On an MacBook Pro M5 it takes about 130 seconds to run the code as-is
+on 8000 images. But the CPU is far from fully utilized, so we can
+potentially do this faster.</p>
 <p>The first step when parallelizing is to determine whether the CPU is
 the bottleneck or whether storage is. We can do this in Python by
 running using the profiler:</p>
 <div class="codewrapper sourceCode" id="cb6">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="ex">python</span> <span class="at">-m</span> cProfile <span class="at">-s</span> cumulative augment_images.py flowers-102/jpg <span class="kw">|</span> <span class="fu">more</span></span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1" aria-label="code-block-6-1"></a><span class="ex">python</span> <span class="at">-m</span> cProfile <span class="at">-s</span> cumulative augment_images.py <span class="kw">|</span> <span class="fu">more</span></span></code></pre>
 </div>
 <p>This allows you to see which functions are using the most time This
 can be inspected using the standard library <code>pstats</code> module,
@@ -2095,7 +2089,8 @@ or more elegantly with tools like SnakeViz.</p>
 <p>Inspection of the results tells us that about 1/2 of the time is
 being spent manipulating and encoding the images, and the remaining 1/2
 of the time is spent on storage I/O. Slower machines will likely show a
-split with more time spent on</p>
+split with more time spent on doing the image manipulation and
+encoding.</p>
 <div id="accordionSpoiler4" class="accordion spoiler-accordion accordion-flush">
 <div class="accordion-item">
 <button class="accordion-button spoiler-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpoiler4" aria-expanded="false" aria-controls="collapseSpoiler4">
@@ -2358,7 +2353,7 @@ eventually be a bottleneck due to disk I/O bandwidth.</p>
 <div class="codewrapper sourceCode" id="cb13">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> python augment_images_threading.py flowers-102/jpg</span></code></pre>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1" aria-label="code-block-13-1"></a><span class="kw">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> python augment_images_threading.py</span></code></pre>
 </div>
 <p>How long does it take to run the code on your machine?</p>
 </div>
@@ -2445,7 +2440,7 @@ set-up for the python environment:</p>
 <div class="codewrapper sourceCode" id="cb17">
 <h3 class="code-label">BASH<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
 </h3>
-<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">[login6003</span> ~]$ cd augment_images</span>
+<pre class="sourceCode bash" tabindex="0"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" tabindex="-1" aria-label="code-block-17-1"></a><span class="ex">[login6003</span> ~]$ cd byte-sized-rse-python-hpc-example</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1" aria-label="code-block-17-2"></a><span class="ex">[login6003</span> augment_images]$ python3.14 <span class="at">-m</span> venv venv</span>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1" aria-label="code-block-17-3"></a><span class="ex">[login6003</span> augment_images]$ source venv/bin/activate</span>
 <span id="cb17-4"><a href="#cb17-4" tabindex="-1" aria-label="code-block-17-4"></a><span class="ex">[login6003</span> augment_images] <span class="er">(</span><span class="ex">venv</span><span class="kw">)</span><span class="ex">$</span> cd data_augmentation</span>
@@ -2861,8 +2856,8 @@ any links that you are not going to use.
   "url": "https://Southampton-RSG-Training.github.io/byte-sized-rse-python-hpc-iridis/aio.html",
   "identifier": "https://Southampton-RSG-Training.github.io/byte-sized-rse-python-hpc-iridis/aio.html",
   "dateCreated": "2026-09-03",
-  "dateModified": "2026-11-17",
-  "datePublished": "2026-11-17"
+  "dateModified": "2026-11-18",
+  "datePublished": "2026-11-18"
 }
 
   </script><script>
