@@ -26,11 +26,11 @@ Python version 3.13 or above is required. Type `python -V` (or `python3 -V` on M
 If you do not have Python installed on your system and require assistance with the installation, you can take a look at [the instructions provided by Software Carpentry](https://swcarpentry.github.io/python-novice-inflammation/#install-python)
 for installing Python in preparation for undertaking their Python lesson.
 
-### Access to Iridis
+### Access to Iridis 6
 
-You will need access to Iridis for this session.
+You will need access to Iridis 6 for this session.
 
-If you do not have access to Iridis, the process of getting access to the system is straightforward for University of Southampton Staff and Students. Use of the system is *free* at the point of use, and there is a [short application form](https://sotonac.sharepoint.com/teams/HPCCommunityWiki/SitePages/Connecting-to-Iridis.aspx) to be filled in.
+If you do not have access to Iridis 6, the process of getting access to the system is straightforward for University of Southampton Staff and Students. Use of the system is *free* at the point of use, and there is a [short application form](https://sotonac.sharepoint.com/teams/HPCCommunityWiki/SitePages/Connecting-to-Iridis.aspx) to be filled in.
 
 You will also need to ensure that you have an SSH client installed on your system, and have [set up your SSH keys for Iridis as described in the above wiki page](https://sotonac.sharepoint.com/teams/HPCCommunityWiki/SitePages/Connecting-to-Iridis.aspx#setting-up-an-ssh-connection).
 
