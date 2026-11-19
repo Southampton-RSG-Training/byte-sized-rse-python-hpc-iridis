@@ -28,9 +28,10 @@ class: title reverse
 
 .left-column[
 
-- An HPC cluster is a group of powerful computers dedicated to computational tasks
-- Each individual computer or 'node' is more powerful than a typical workstation
-- A cluster will have shared high-performance disk storage
+- An HPC cluster is a group of shared computers.
+- Each individual computer or 'node' is more powerful than a typical workstation.
+- A cluster will have shared high-performance storage.
+- Typically only the login node can see the wider internet.
 ]
 .right-column[
   ![](HPC.png)
@@ -62,7 +63,7 @@ class: title reverse
 
 From the Bash command-line:
 ``` bash
-$ ssh login6001.iridis.soton.ac.uk
+$ ssh username@iridis6.soton.ac.uk
 
 	###########################
 
@@ -71,7 +72,7 @@ $ ssh login6001.iridis.soton.ac.uk
 	###########################
 
 Last login: Mon Nov 16 15:01:31 2026
-[user@login6001 ~]$
+[username@login6001 ~]$
 ```
 Or use an SSH client like PuTTY.
 ]
@@ -248,7 +249,7 @@ print("LOCALID", os.environ.get("SLURM_LOCALID"))
 #SBATCH --partition=batch
 #SBATCH --time=00:10:00
 #SBATCH --nodes=2
-#SBATCH --ntasks=4
+#SBATCH --tasks-per-node=2
 #SBATCH --cpus-per-task=1
 
 # Load required modules
