@@ -531,7 +531,7 @@ Schedule the job to run on Iridis 6.
 
 On the Iridis 6 login node run:
 ``` bash
-[login6003 augment_images]$ sbatch run_multiprocess.slurm
+[login6003 augment_images]$ sbatch run_multiprocessing.slurm
 ```
 you can monitor job progress with `squeue -lu <username>` or looking at the `sbatch` file in your current directory.
 
