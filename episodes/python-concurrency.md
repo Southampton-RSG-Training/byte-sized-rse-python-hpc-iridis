@@ -342,7 +342,7 @@ To do a fair comparison, we need to remove the output, since overwriting this ma
 Run the threaded version of the script on your machine:
 
 ``` bash
-(venv)$ python augment_images_threading.py flowers-102/jpg
+(venv)$ python augment_images_threading.py flowers-102
 ```
 
 How long does it take to run the code on your machine?
@@ -425,7 +425,7 @@ We've determined that this is a task that (a) distributes well with multiprocess
 
 ### Installing on Iridis
 
-You will need to log-in to Iridis using your credentials, something like (replacing `<username>` with your username, and depending on how you set up your `ssh` keys, it may have an additional `-i` option):
+You will need to log-in to Iridis using your credentials, something like (replacing `<username>` with your username):
 ``` bash
 $ ssh <username>@iridis6.soton.ac.uk
 ```
@@ -456,6 +456,22 @@ and download the data set:
 That puts us in a position to run the code using Iridis. In fact, for a small job like our example, running our efficient multi-process script on the login node, which should take less than a minute, would be acceptable.
 
 However, we want to learn how to use the full power of Iridis.
+
+:::
+
+::: spoiler
+
+### Copying files with `scp`
+
+It might be the case that the data you want to use is on your computer and not downloadable from the internet.  In that case you can use the "secure copy" `scp` command which is part of the `ssh` suite of tools.
+
+For example you could upload the `flowers-102` directory from your laptop to iridis using a Bash command like the following:
+
+``` bash
+scp -r flowers-102 username@iridis6.soton.ac.uk:flowers-102
+```
+
+Client programs like PuTTY also provide file copy functionality.
 
 :::
 
@@ -597,7 +613,7 @@ The batch file is similar to the previous one:
 #SBATCH --partition=batch
 #SBATCH --time=00:15:00     # Maximum run time
 #SBATCH --nodes=2           # Run on just 2 node
-#SBATCH --ntasks=64         # Run 64 workers across the nodes
+#SBATCH --tasks-per-node=32 # Run 64 workers across the nodes
 
 # Optional: print useful job info
 echo "Running on host: $(hostname)"
@@ -628,7 +644,7 @@ The key differences are the number of nodes and tasks (which are ):
 
 ``` bash
 #SBATCH --nodes=2           # Run on just 2 nodes.
-#SBATCH --ntasks=64         # Run 64 processes across the nodes.
+#SBATCH --tasks-per-node=32 # Run 64 processes across the nodes.
 ```
 
 the fact that we need to load OpenMPI:
